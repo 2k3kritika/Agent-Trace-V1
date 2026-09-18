@@ -1,0 +1,70 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.secret
+*.pem
+*.key
+
+# Python virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Python cache and build artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Test and tooling output
+coverage.xml
+junit.xml
+.pyre/
+.pytype/
+.hypothesis/
+
+# Local databases and runtime files
+*.db
+*.sqlite
+*.sqlite3
+*.log
+*.pid
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Node/frontend dependencies and build output
+node_modules/
+.npm/
+.pnpm-store/
+.yarn/
+*.tsbuildinfo
+.next/
+out/
+
+# Docker and local tooling overrides
+docker-compose.override.yml
+
+# Temporary files
+.tmp/
+tmp/
+temp/
+*.tmp
