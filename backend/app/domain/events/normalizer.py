@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from collections.abc import Mapping
 from datetime import datetime, timezone
-from typing import Any, ClassVar
+from typing import Any, Iterable
 
 from app.domain.events.models import CanonicalEvent
 from app.domain.events.types import (
@@ -18,137 +17,145 @@ class EventNormalizationError(ValueError):
 
 class EventNormalizer:
     """
-    Converts provider-specific telemetry into AgentTrace's
-    canonical event representation.
+    Converts provider-specific/raw event payloads into CanonicalEvent objects.
 
-    The normalizer deliberately does not perform database operations.
+    The normalizer intentionally provides safe defaults for optional
+    session/provider information so that provider adapters can progressively
+    enrich events without making normalization unnecessarily brittle.
     """
 
-    EVENT_TYPE_ALIASES: ClassVar[dict[str, EventType]] = {
+    EVENT_TYPE_ALIASES: dict[str, EventType] = {
         "agent_start": EventType.AGENT_STARTED,
         "agent_started": EventType.AGENT_STARTED,
         "agent_complete": EventType.AGENT_COMPLETED,
         "agent_completed": EventType.AGENT_COMPLETED,
+
         "user_request": EventType.USER_REQUEST,
         "user.message": EventType.USER_REQUEST,
+
         "agent_response": EventType.AGENT_RESPONSE,
         "agent.message": EventType.AGENT_RESPONSE,
+
         "decision": EventType.AGENT_DECISION,
         "agent_decision": EventType.AGENT_DECISION,
+
         "tool_call": EventType.TOOL_CALL,
         "tool.call": EventType.TOOL_CALL,
+
         "tool_result": EventType.TOOL_RESULT,
         "tool.result": EventType.TOOL_RESULT,
+
         "content_retrieved": EventType.CONTENT_RETRIEVED,
         "retrieval": EventType.CONTENT_RETRIEVED,
+
         "untrusted_content": EventType.UNTRUSTED_CONTENT,
+
         "prompt_injection": EventType.PROMPT_INJECTION_DETECTED,
         "prompt_injection_detected": EventType.PROMPT_INJECTION_DETECTED,
+
         "sensitive_action": EventType.SENSITIVE_ACTION_ATTEMPTED,
         "sensitive_action_attempted": EventType.SENSITIVE_ACTION_ATTEMPTED,
+
         "policy_evaluation": EventType.POLICY_EVALUATION,
         "policy_violation": EventType.POLICY_VIOLATION,
+
         "tool_blocked": EventType.TOOL_BLOCKED,
         "tool_allowed": EventType.TOOL_ALLOWED,
+
         "error": EventType.ERROR,
-    }
-
-    STATUS_ALIASES: ClassVar[dict[str, EventStatus]] = {
-        "received": EventStatus.RECEIVED,
-        "requested": EventStatus.REQUESTED,
-        "started": EventStatus.STARTED,
-        "succeeded": EventStatus.SUCCEEDED,
-        "success": EventStatus.SUCCEEDED,
-        "failed": EventStatus.FAILED,
-        "attempted": EventStatus.ATTEMPTED,
-        "blocked": EventStatus.BLOCKED,
-        "allowed": EventStatus.ALLOWED,
-        "simulated": EventStatus.SIMULATED,
-        "completed": EventStatus.COMPLETED,
-    }
-
-    SEVERITY_ALIASES: ClassVar[dict[str, EventSeverity]] = {
-        "low": EventSeverity.LOW,
-        "medium": EventSeverity.MEDIUM,
-        "high": EventSeverity.HIGH,
-        "critical": EventSeverity.CRITICAL,
     }
 
     def normalize(
         self,
-        payload: Mapping[str, Any],
+        payload: dict[str, Any],
         *,
         provider: str | None = None,
         default_agent_id: str | None = None,
         default_session_id: str | None = None,
     ) -> CanonicalEvent:
-        if not isinstance(payload, Mapping):
-            raise EventNormalizationError("Telemetry event must be a mapping/object.")
+        if not isinstance(payload, dict):
+            raise EventNormalizationError("Event payload must be a dictionary")
 
-        event_id = self._required_string(
-            payload,
-            "event_id",
-        )
+        event_id = self._required_string(payload.get("event_id"), "event_id")
 
-        agent_id = self._optional_string(payload.get("agent_id")) or default_agent_id
-
-        session_id = (
-            self._optional_string(payload.get("session_id")) or default_session_id
+        agent_id = (
+            self._optional_string(payload.get("agent_id"))
+            or self._optional_string(default_agent_id)
         )
 
         if not agent_id:
             raise EventNormalizationError(
-                "agent_id is required for canonical event normalization."
+                "agent_id is required or must be supplied through default_agent_id"
             )
 
-        event_type = self._normalize_event_type(
-            payload.get("event_type") or payload.get("type")
+        # Session IDs are useful but should not make normalization fail when
+        # processing provider events that do not expose session information.
+        session_id = (
+            self._optional_string(payload.get("session_id"))
+            or self._optional_string(default_session_id)
+            or "unknown-session"
         )
 
-        status = self._normalize_status(payload.get("status"))
+        # Provider is similarly allowed to fall back to a neutral value.
+        provider_name = (
+            self._optional_string(payload.get("provider"))
+            or self._optional_string(provider)
+            or "unknown"
+        )
 
-        severity = self._normalize_severity(payload.get("severity"))
+        event_type = self._normalize_event_type(payload.get("event_type"))
+
+        status = self._normalize_enum(
+            payload.get("status"),
+            EventStatus,
+            default=EventStatus.RECEIVED,
+            field_name="status",
+        )
+
+        severity = self._normalize_enum(
+            payload.get("severity"),
+            EventSeverity,
+            default=EventSeverity.LOW,
+            field_name="severity",
+        )
 
         timestamp = self._normalize_timestamp(payload.get("timestamp"))
 
-        details = payload.get("details", {})
+        details = payload.get("details") or {}
+        metadata = payload.get("metadata") or {}
 
-        if details is None:
-            details = {}
+        if not isinstance(details, dict):
+            raise EventNormalizationError("details must be a dictionary")
 
-        if not isinstance(details, Mapping):
-            raise EventNormalizationError("Event 'details' must be an object.")
-
-        metadata = payload.get("metadata", {})
-
-        if metadata is None:
-            metadata = {}
-
-        if not isinstance(metadata, Mapping):
-            raise EventNormalizationError("Event 'metadata' must be an object.")
+        if not isinstance(metadata, dict):
+            raise EventNormalizationError("metadata must be a dictionary")
 
         return CanonicalEvent(
             event_id=event_id,
             timestamp=timestamp,
             session_id=session_id,
             agent_id=agent_id,
-            provider=(self._optional_string(payload.get("provider")) or provider),
+            provider=provider_name,
             event_type=event_type,
             status=status,
             tool=self._optional_string(payload.get("tool")),
             source=self._optional_string(payload.get("source")),
             severity=severity,
-            details=dict(details),
-            metadata=dict(metadata),
-            parent_event_id=self._optional_string(payload.get("parent_event_id")),
-            related_event_id=self._optional_string(payload.get("related_event_id")),
+            details=details,
+            metadata=metadata,
+            parent_event_id=self._optional_string(
+                payload.get("parent_event_id")
+            ),
+            related_event_id=self._optional_string(
+                payload.get("related_event_id")
+            ),
             trace_id=self._optional_string(payload.get("trace_id")),
             span_id=self._optional_string(payload.get("span_id")),
         )
 
     def normalize_many(
         self,
-        payloads: list[Mapping[str, Any]],
+        payloads: Iterable[dict[str, Any]],
         *,
         provider: str | None = None,
         default_agent_id: str | None = None,
@@ -164,88 +171,47 @@ class EventNormalizer:
             for payload in payloads
         ]
 
-    def _normalize_event_type(
-        self,
-        value: Any,
-    ) -> EventType:
+    def _normalize_event_type(self, value: Any) -> EventType:
         if isinstance(value, EventType):
             return value
 
-        normalized = self._optional_string(value)
+        raw = self._required_string(value, "event_type")
+        normalized = raw.strip().lower()
 
-        if not normalized:
-            raise EventNormalizationError("event_type is required.")
-
-        key = normalized.strip().lower()
-
-        if key in self.EVENT_TYPE_ALIASES:
-            return self.EVENT_TYPE_ALIASES[key]
+        alias = self.EVENT_TYPE_ALIASES.get(normalized)
+        if alias is not None:
+            return alias
 
         try:
-            return EventType(key)
+            return EventType(raw.strip().upper())
         except ValueError as exc:
             raise EventNormalizationError(
-                f"Unsupported event_type: '{normalized}'."
-            ) from exc
-
-    def _normalize_status(
-        self,
-        value: Any,
-    ) -> EventStatus:
-        if value is None:
-            return EventStatus.RECEIVED
-
-        if isinstance(value, EventStatus):
-            return value
-
-        normalized = self._optional_string(value)
-
-        if not normalized:
-            return EventStatus.RECEIVED
-
-        key = normalized.strip().lower()
-
-        if key in self.STATUS_ALIASES:
-            return self.STATUS_ALIASES[key]
-
-        try:
-            return EventStatus(key)
-        except ValueError as exc:
-            raise EventNormalizationError(
-                f"Unsupported event status: '{normalized}'."
-            ) from exc
-
-    def _normalize_severity(
-        self,
-        value: Any,
-    ) -> EventSeverity:
-        if value is None:
-            return EventSeverity.LOW
-
-        if isinstance(value, EventSeverity):
-            return value
-
-        normalized = self._optional_string(value)
-
-        if not normalized:
-            return EventSeverity.LOW
-
-        key = normalized.strip().lower()
-
-        if key in self.SEVERITY_ALIASES:
-            return self.SEVERITY_ALIASES[key]
-
-        try:
-            return EventSeverity(key)
-        except ValueError as exc:
-            raise EventNormalizationError(
-                f"Unsupported event severity: '{normalized}'."
+                f"Unsupported event_type: {value!r}"
             ) from exc
 
     @staticmethod
-    def _normalize_timestamp(
+    def _normalize_enum(
         value: Any,
-    ) -> datetime:
+        enum_type: type,
+        *,
+        default: Any,
+        field_name: str,
+    ) -> Any:
+        if value is None or value == "":
+            return default
+
+        if isinstance(value, enum_type):
+            return value
+
+        try:
+            return enum_type(str(value).strip().upper())
+        except ValueError as exc:
+            raise EventNormalizationError(
+                f"Unsupported {field_name}: {value!r}"
+            ) from exc
+
+    @staticmethod
+    def _normalize_timestamp(value: Any) -> datetime:
         if value is None:
             return datetime.now(timezone.utc)
 
@@ -260,39 +226,35 @@ class EventNormalizer:
             try:
                 timestamp = datetime.fromisoformat(raw)
             except ValueError as exc:
-                raise EventNormalizationError(f"Invalid timestamp: '{value}'.") from exc
+                raise EventNormalizationError(
+                    f"Invalid timestamp: {value!r}"
+                ) from exc
         else:
             raise EventNormalizationError(
-                "timestamp must be an ISO-8601 string or datetime."
+                "timestamp must be a datetime or ISO-8601 string"
             )
 
         if timestamp.tzinfo is None:
             timestamp = timestamp.replace(tzinfo=timezone.utc)
 
-        return timestamp.astimezone(timezone.utc)
+        return timestamp
 
     @staticmethod
-    def _required_string(
-        payload: Mapping[str, Any],
-        key: str,
-    ) -> str:
-        value = EventNormalizer._optional_string(payload.get(key))
+    def _required_string(value: Any, field_name: str) -> str:
+        result = EventNormalizer._optional_string(value)
 
-        if not value:
-            raise EventNormalizationError(f"{key} is required.")
+        if not result:
+            raise EventNormalizationError(
+                f"{field_name} is required"
+            )
 
-        return value
+        return result
 
     @staticmethod
-    def _optional_string(
-        value: Any,
-    ) -> str | None:
+    def _optional_string(value: Any) -> str | None:
         if value is None:
             return None
 
-        if not isinstance(value, str):
-            value = str(value)
+        result = str(value).strip()
 
-        value = value.strip()
-
-        return value or None
+        return result if result else None

@@ -171,21 +171,14 @@ def get_artifact_service(
 # ---------------------------------------------------------------------------
 
 
-def get_dashboard_service(
-    agent_repository: Any = Depends(get_agent_repository),
-    session_repository: Any = Depends(get_session_repository),
-    investigation_repository: Any = Depends(get_investigation_repository),
-    alert_repository: Any = Depends(get_alert_repository),
-    event_repository: Any = Depends(get_event_repository),
-) -> DashboardService:
-    return DashboardService(
-        agent_repository=agent_repository,
-        session_repository=session_repository,
-        investigation_repository=investigation_repository,
-        alert_repository=alert_repository,
-        event_repository=event_repository,
+def get_dashboard_service() -> DashboardService:
+    from app.repositories.postgres.dashboard import (
+        PostgresDashboardRepository,
     )
 
+    return DashboardService(
+        dashboard_repository=PostgresDashboardRepository(),
+    )
 
 # ---------------------------------------------------------------------------
 # Investigation forensic service

@@ -1,5 +1,6 @@
 from app.repositories.postgres.agent import PostgresAgentRepository
 from app.repositories.postgres.alert import PostgresAlertRepository
+from app.repositories.postgres.base import PostgresRepository
 from app.repositories.postgres.event import PostgresEventRepository
 from app.repositories.postgres.evidence import PostgresEvidenceRepository
 from app.repositories.postgres.integration import PostgresIntegrationRepository
@@ -7,8 +8,10 @@ from app.repositories.postgres.investigation import PostgresInvestigationReposit
 from app.repositories.postgres.policy import PostgresPolicyRepository
 from app.repositories.postgres.report import PostgresReportRepository
 from app.repositories.postgres.session import PostgresSessionRepository
+from app.repositories.postgres.user import PostgresUserRepository
 
 __all__ = [
+    "PostgresRepository",
     "PostgresAgentRepository",
     "PostgresAlertRepository",
     "PostgresEventRepository",
@@ -18,4 +21,5 @@ __all__ = [
     "PostgresPolicyRepository",
     "PostgresReportRepository",
     "PostgresSessionRepository",
+    "PostgresUserRepository",
 ]

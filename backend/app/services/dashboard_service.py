@@ -1,68 +1,71 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
-
-from app.repositories.postgres.dashboard import (
-    PostgresDashboardRepository,
-)
-from app.schemas.dashboard import (
-    DashboardAgentSummary,
-    DashboardAlertSummary,
-    DashboardInvestigationSummary,
-    DashboardOverviewResponse,
-    DashboardRiskDistribution,
-    DashboardSecurityEvent,
-    DashboardSessionSummary,
-)
+from typing import Any
 
 
 class DashboardService:
     def __init__(
         self,
-        repository: PostgresDashboardRepository,
-    ):
-        self.repository = repository
+        dashboard_repository: Any,
+    ) -> None:
+        self.dashboard_repository = dashboard_repository
 
     async def get_overview(
         self,
-    ) -> DashboardOverviewResponse:
-        agents = await self.repository.count_agents()
-        sessions = await self.repository.count_sessions()
-        investigations = await self.repository.count_investigations()
-        alerts = await self.repository.count_alerts()
-        risk_distribution = await self.repository.risk_distribution()
+        recent_limit: int = 10,
+    ) -> dict[str, Any]:
+        (
+            agents,
+            sessions,
+            investigations,
+            alerts,
+            security_events_last_24h,
+            risk_distribution,
+            recent_security_events,
+        ) = await self._collect_metrics(recent_limit)
 
-        events = await self.repository.recent_security_events(limit=10)
+        return {
+            "agents": agents,
+            "sessions": sessions,
+            "investigations": investigations,
+            "alerts": alerts,
+            "security_events_last_24h": security_events_last_24h,
+            "risk_distribution": risk_distribution,
+            "recent_security_events": recent_security_events,
+        }
 
-        recent_events = [
-            DashboardSecurityEvent(
-                event_id=event.event_id,
-                timestamp=event.timestamp,
-                agent_id=event.agent_id,
-                session_id=event.session_id,
-                event_type=event.event_type,
-                severity=event.severity,
-                status=event.status,
-                tool=event.tool,
-                title=(event.details.get("title") if event.details else None),
-            )
-            for event in events
-        ]
+    async def _collect_metrics(
+        self,
+        recent_limit: int,
+    ) -> tuple[
+        int,
+        int,
+        int,
+        int,
+        int,
+        dict[str, int],
+        list[dict[str, Any]],
+    ]:
+        repository = self.dashboard_repository
 
-        return DashboardOverviewResponse(
-            generated_at=datetime.now(timezone.utc),
-            agents=DashboardAgentSummary(**agents),
-            sessions=DashboardSessionSummary(**sessions),
-            investigations=DashboardInvestigationSummary(**investigations),
-            alerts=DashboardAlertSummary(**alerts),
-            risk_distribution=DashboardRiskDistribution(**risk_distribution),
-            recent_security_events=recent_events,
-            metrics={
-                "security_events_last_24h": await self._events_last_24h(),
-            },
+        agents = await repository.count_agents()
+        sessions = await repository.count_sessions()
+        investigations = await repository.count_investigations()
+        alerts = await repository.count_alerts()
+        security_events_last_24h = (
+            await repository.count_security_events_last_24h()
+        )
+        risk_distribution = await repository.risk_distribution()
+        recent_security_events = (
+            await repository.recent_security_events(recent_limit)
         )
 
-    async def _events_last_24h(self) -> int:
-        # Kept as a separate method so this metric can later be
-        # moved into a repository query without changing the API.
-        return 0
+        return (
+            agents,
+            sessions,
+            investigations,
+            alerts,
+            security_events_last_24h,
+            risk_distribution,
+            recent_security_events,
+        )
