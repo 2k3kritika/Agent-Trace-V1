@@ -1,15 +1,14 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
-from boto3.dynamodb.conditions import Key
-
 from app.domain.events.types import EventSeverity
+from app.infrastructure.aws.dynamodb import get_dynamodb_table
 from app.repositories.interfaces import EventRepository, RepositoryListResult
 from app.schemas.events import CanonicalEventResponse
-from app.infrastructure.aws.dynamodb import get_dynamodb_table
+from boto3.dynamodb.conditions import Key
 
 
 class DynamoDBEventRepository(EventRepository):
@@ -55,7 +54,7 @@ class DynamoDBEventRepository(EventRepository):
         timestamp: datetime | None = None,
     ) -> tuple[str, str]:
         session_key = session_id or "unknown"
-        event_timestamp = timestamp or datetime.utcnow()
+        event_timestamp = timestamp or datetime.now(timezone.utc)
 
         return (
             f"SESSION#{session_key}",
@@ -194,9 +193,7 @@ class DynamoDBEventRepository(EventRepository):
         def operation() -> list[dict[str, Any]]:
             if session_id:
                 response = self.table.query(
-                    KeyConditionExpression=Key("PK").eq(
-                        f"SESSION#{session_id}"
-                    ),
+                    KeyConditionExpression=Key("PK").eq(f"SESSION#{session_id}"),
                 )
                 items = response.get("Items", [])
             else:
@@ -208,30 +205,18 @@ class DynamoDBEventRepository(EventRepository):
                 ]
 
             if agent_id:
-                items = [
-                    item
-                    for item in items
-                    if item.get("agent_id") == agent_id
-                ]
+                items = [item for item in items if item.get("agent_id") == agent_id]
 
             if event_type:
-                items = [
-                    item
-                    for item in items
-                    if item.get("event_type") == event_type
-                ]
+                items = [item for item in items if item.get("event_type") == event_type]
 
             if severity:
                 severity_value = (
-                    severity.value
-                    if hasattr(severity, "value")
-                    else str(severity)
+                    severity.value if hasattr(severity, "value") else str(severity)
                 )
 
                 items = [
-                    item
-                    for item in items
-                    if item.get("severity") == severity_value
+                    item for item in items if item.get("severity") == severity_value
                 ]
 
             return sorted(
@@ -246,10 +231,7 @@ class DynamoDBEventRepository(EventRepository):
         start = max(page - 1, 0) * page_size
         end = start + page_size
 
-        page_items = [
-            self._item_to_response(item)
-            for item in items[start:end]
-        ]
+        page_items = [self._item_to_response(item) for item in items[start:end]]
 
         return RepositoryListResult(
             items=page_items,

@@ -59,9 +59,7 @@ class DynamoDBIntegrationRepository(IntegrationRepository):
         result = await self.get_optional_by_id(integration_id)
 
         if result is None:
-            raise KeyError(
-                f"Integration '{integration_id}' was not found"
-            )
+            raise KeyError(f"Integration '{integration_id}' was not found")
 
         return result
 
@@ -139,25 +137,13 @@ class DynamoDBIntegrationRepository(IntegrationRepository):
             ]
 
             if agent_id:
-                items = [
-                    item
-                    for item in items
-                    if item.get("agent_id") == agent_id
-                ]
+                items = [item for item in items if item.get("agent_id") == agent_id]
 
             if provider:
-                items = [
-                    item
-                    for item in items
-                    if item.get("provider") == provider
-                ]
+                items = [item for item in items if item.get("provider") == provider]
 
             if status:
-                items = [
-                    item
-                    for item in items
-                    if item.get("status") == status
-                ]
+                items = [item for item in items if item.get("status") == status]
 
             return items
 
@@ -167,9 +153,6 @@ class DynamoDBIntegrationRepository(IntegrationRepository):
         start = max(page - 1, 0) * page_size
 
         return RepositoryListResult(
-            items=[
-                self._to_dict(item)
-                for item in items[start:start + page_size]
-            ],
+            items=[self._to_dict(item) for item in items[start : start + page_size]],
             total=total,
         )

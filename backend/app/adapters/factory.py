@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from app.adapters.local.generic import GenericLocalAdapter
 from app.adapters.gemini.gemini import GeminiAdapter
+from app.adapters.local.generic import GenericLocalAdapter
 from app.adapters.local.nova import NovaAdapter
 from app.adapters.local.research_agent import ResearchAgentAdapter
 from app.adapters.registry import AdapterRegistry

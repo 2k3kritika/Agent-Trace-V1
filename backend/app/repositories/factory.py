@@ -4,7 +4,6 @@ from typing import Literal
 
 from app.core.config import get_settings
 
-
 StorageBackend = Literal["postgres", "dynamodb"]
 
 
@@ -14,9 +13,7 @@ def get_storage_backend() -> StorageBackend:
     backend = settings.storage_backend.lower()
 
     if backend not in {"postgres", "dynamodb"}:
-        raise ValueError(
-            f"Unsupported STORAGE_BACKEND: {settings.storage_backend}"
-        )
+        raise ValueError(f"Unsupported STORAGE_BACKEND: {settings.storage_backend}")
 
     return backend
 

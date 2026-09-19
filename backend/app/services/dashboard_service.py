@@ -52,13 +52,9 @@ class DashboardService:
         sessions = await repository.count_sessions()
         investigations = await repository.count_investigations()
         alerts = await repository.count_alerts()
-        security_events_last_24h = (
-            await repository.count_security_events_last_24h()
-        )
+        security_events_last_24h = await repository.count_security_events_last_24h()
         risk_distribution = await repository.risk_distribution()
-        recent_security_events = (
-            await repository.recent_security_events(recent_limit)
-        )
+        recent_security_events = await repository.recent_security_events(recent_limit)
 
         return (
             agents,

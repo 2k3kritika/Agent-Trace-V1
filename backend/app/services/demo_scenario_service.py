@@ -5,7 +5,6 @@ from typing import Any
 
 from app.adapters.factory import default_registry
 from app.domain.events.models import CanonicalEvent
-from app.domain.events.types import EventSeverity
 from app.domain.policy.models import PolicyDecision
 from app.services.detection_service import DetectionService
 from app.services.event_service import EventService
@@ -235,38 +234,24 @@ class DemoScenarioService:
             persisted = await self.event_service.ingest_event(canonical)
             persisted_events.append(persisted)
 
-        findings = self.detection_service.detect_many(
-            canonical_events
-        )
+        findings = self.detection_service.detect_many(canonical_events)
 
         all_findings = findings.findings
 
         policy_context = {
-            "events": [
-                event.model_dump(mode="json")
-                for event in canonical_events
-            ],
-            "findings": [
-                finding.model_dump(mode="json")
-                for finding in all_findings
-            ],
+            "events": [event.model_dump(mode="json") for event in canonical_events],
+            "findings": [finding.model_dump(mode="json") for finding in all_findings],
             "sensitive_action_attempted": True,
             "external_transmission": False,
         }
 
-        policy_decision: PolicyDecision = (
-            self.policy_service.evaluate_context(policy_context)
+        policy_decision: PolicyDecision = self.policy_service.evaluate_context(
+            policy_context
         )
 
         risk_context = {
-            "events": [
-                event.model_dump(mode="json")
-                for event in canonical_events
-            ],
-            "findings": [
-                finding.model_dump(mode="json")
-                for finding in all_findings
-            ],
+            "events": [event.model_dump(mode="json") for event in canonical_events],
+            "findings": [finding.model_dump(mode="json") for finding in all_findings],
             "policy_violation": True,
             "sensitive_action_attempted": True,
             "sensitive_action_executed": False,
@@ -274,9 +259,7 @@ class DemoScenarioService:
             "action_blocked": True,
         }
 
-        risk_assessment = self.risk_service.calculate(
-            risk_context
-        )
+        self.risk_service.calculate(risk_context)
 
         investigation = await self.investigation_service.create_investigation(
             session_id=self.SESSION_ID,
@@ -299,9 +282,7 @@ class DemoScenarioService:
             },
         )
 
-        forensic_result = self.forensic_service.analyze(
-            canonical_events
-        )
+        forensic_result = self.forensic_service.analyze(canonical_events)
 
         return {
             "scenario": "acme-investigation",

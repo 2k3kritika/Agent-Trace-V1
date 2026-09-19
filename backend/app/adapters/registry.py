@@ -21,9 +21,7 @@ class AdapterRegistry:
         key = self._normalize_key(adapter.adapter_name)
 
         if key in self._adapters:
-            raise ValueError(
-                f"Adapter '{adapter.adapter_name}' is already registered."
-            )
+            raise ValueError(f"Adapter '{adapter.adapter_name}' is already registered.")
 
         self._adapters[key] = adapter
 
@@ -43,9 +41,7 @@ class AdapterRegistry:
         try:
             return self._adapters[key]
         except KeyError:
-            available = ", ".join(
-                sorted(self._adapters.keys())
-            )
+            available = ", ".join(sorted(self._adapters.keys()))
 
             raise KeyError(
                 f"Unknown adapter '{adapter_name}'. "
@@ -56,10 +52,7 @@ class AdapterRegistry:
         self,
         adapter_name: str,
     ) -> bool:
-        return (
-            self._normalize_key(adapter_name)
-            in self._adapters
-        )
+        return self._normalize_key(adapter_name) in self._adapters
 
     def list_adapters(self) -> list[str]:
         return sorted(self._adapters.keys())

@@ -1,4 +1,5 @@
 from app.api.routes import (
+    adapters,
     agents,
     alerts,
     artifacts,
@@ -6,6 +7,7 @@ from app.api.routes import (
     auth,
     correlation,
     dashboard,
+    demo,
     detection,
     events,
     evidence,
@@ -18,10 +20,9 @@ from app.api.routes import (
     sessions,
     telemetry,
 )
-from app.api.routes import adapters
-from app.api.routes import demo
 
 __all__ = [
+    "adapters",
     "agents",
     "alerts",
     "artifacts",
@@ -29,6 +30,7 @@ __all__ = [
     "auth",
     "correlation",
     "dashboard",
+    "demo",
     "detection",
     "events",
     "evidence",
@@ -40,6 +42,4 @@ __all__ = [
     "reports",
     "sessions",
     "telemetry",
-    "adapters",
-    "demo"
 ]

@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any
+from typing import Any, ClassVar
 
-from app.adapters.base import AgentAdapter, AdapterConnectionResult, AdapterHealthResult
+from app.adapters.base import AdapterConnectionResult, AdapterHealthResult, AgentAdapter
 from app.domain.events.models import CanonicalEvent
 from app.domain.events.normalizer import EventNormalizer
 
@@ -21,8 +21,8 @@ class OpenAICompatibleAdapter(AgentAdapter):
     provider = "openai_compatible"
     display_name = "OpenAI Compatible"
     adapter_name = "openai_compatible"
-    
-    _EVENT_TYPE_ALIASES = {
+
+    _EVENT_TYPE_ALIASES: ClassVar[dict[str, str]] = {
         "request": "USER_REQUEST",
         "user_request": "USER_REQUEST",
         "prompt": "USER_REQUEST",
@@ -99,9 +99,7 @@ class OpenAICompatibleAdapter(AgentAdapter):
         payload = dict(raw_event)
 
         event_type = self._event_type(
-            payload.get("event_type")
-            or payload.get("type")
-            or payload.get("event")
+            payload.get("event_type") or payload.get("type") or payload.get("event")
         )
 
         details = dict(payload.get("details") or {})
@@ -162,7 +160,9 @@ class OpenAICompatibleAdapter(AgentAdapter):
             default_provider="openai_compatible",
         )
 
-    def validate_connection(self, configuration: Mapping[str, Any] | None = None) -> AdapterConnectionResult:
+    def validate_connection(
+        self, configuration: Mapping[str, Any] | None = None
+    ) -> AdapterConnectionResult:
         configuration = configuration or {}
 
         endpoint = configuration.get("endpoint") or configuration.get("base_url")

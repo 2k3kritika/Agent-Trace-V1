@@ -131,9 +131,7 @@ def test_risk_assessment_for_prompt_injection():
         severity=EventSeverity.HIGH,
     )
 
-    assessment = RiskService().assess_findings_for_hero_demo(
-        [finding]
-    )
+    assessment = RiskService().assess_findings_for_hero_demo([finding])
 
     assert assessment.score > 0
     assert assessment.level in {
@@ -144,9 +142,7 @@ def test_risk_assessment_for_prompt_injection():
     }
 
     assert len(assessment.contributions) == 1
-    assert assessment.contributions[0].source_id == (
-        "PROMPT_INJECTION_DETECTED"
-    )
+    assert assessment.contributions[0].source_id == ("PROMPT_INJECTION_DETECTED")
 
 
 def test_risk_assessment_for_sensitive_action():
@@ -165,10 +161,7 @@ def test_risk_assessment_for_sensitive_action():
     )
 
     assert assessment.score > 0
-    assert any(
-        "sensitive action" in factor.lower()
-        for factor in assessment.factors
-    )
+    assert any("sensitive action" in factor.lower() for factor in assessment.factors)
 
 
 def test_risk_assessment_increases_for_contextual_risk():

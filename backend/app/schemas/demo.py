@@ -6,6 +6,23 @@ from typing import Any
 from app.schemas.common import APIModel
 
 
+class DemoScenarioResponse(APIModel):
+    scenario: str
+    agent_id: str
+    session_id: str
+    investigation_id: str | None
+
+    risk_score: int
+    risk_level: str
+
+    suspicious_events: int
+    sensitive_action_attempted: bool
+    sensitive_action_executed: bool
+    policy_violation: bool
+    action_blocked: bool
+    external_transmission: bool
+
+
 class DemoRunResponse(APIModel):
     scenario: str
     agent_id: str

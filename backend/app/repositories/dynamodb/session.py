@@ -4,8 +4,6 @@ import asyncio
 from datetime import datetime
 from typing import Any
 
-from boto3.dynamodb.conditions import Key
-
 from app.infrastructure.aws.dynamodb import get_dynamodb_table
 from app.repositories.interfaces import RepositoryListResult, SessionRepository
 
@@ -69,11 +67,7 @@ class DynamoDBSessionRepository(SessionRepository):
                 else str(session.status)
             ),
             "started_at": session.started_at.isoformat(),
-            "ended_at": (
-                session.ended_at.isoformat()
-                if session.ended_at
-                else None
-            ),
+            "ended_at": (session.ended_at.isoformat() if session.ended_at else None),
             "duration": session.duration,
             "event_count": session.event_count or 0,
             "alert_count": session.alert_count or 0,
@@ -203,25 +197,13 @@ class DynamoDBSessionRepository(SessionRepository):
             ]
 
             if agent_id:
-                items = [
-                    item
-                    for item in items
-                    if item.get("agent_id") == agent_id
-                ]
+                items = [item for item in items if item.get("agent_id") == agent_id]
 
             if status:
-                items = [
-                    item
-                    for item in items
-                    if item.get("status") == status
-                ]
+                items = [item for item in items if item.get("status") == status]
 
             if risk_level:
-                items = [
-                    item
-                    for item in items
-                    if item.get("risk_level") == risk_level
-                ]
+                items = [item for item in items if item.get("risk_level") == risk_level]
 
             return sorted(
                 items,
@@ -236,8 +218,7 @@ class DynamoDBSessionRepository(SessionRepository):
 
         return RepositoryListResult(
             items=[
-                self._item_to_dict(item)
-                for item in items[start:start + page_size]
+                self._item_to_dict(item) for item in items[start : start + page_size]
             ],
             total=total,
         )

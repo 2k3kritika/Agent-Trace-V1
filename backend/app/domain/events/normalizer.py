@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Iterable
 from datetime import datetime, timezone
-from typing import Any, Iterable
+from typing import Any, ClassVar
 
 from app.domain.events.models import CanonicalEvent
 from app.domain.events.types import (
@@ -24,44 +25,32 @@ class EventNormalizer:
     enrich events without making normalization unnecessarily brittle.
     """
 
-    EVENT_TYPE_ALIASES: dict[str, EventType] = {
+    EVENT_TYPE_ALIASES: ClassVar[dict[str, EventType]] = {
         "agent_start": EventType.AGENT_STARTED,
         "agent_started": EventType.AGENT_STARTED,
         "agent_complete": EventType.AGENT_COMPLETED,
         "agent_completed": EventType.AGENT_COMPLETED,
-
         "user_request": EventType.USER_REQUEST,
         "user.message": EventType.USER_REQUEST,
-
         "agent_response": EventType.AGENT_RESPONSE,
         "agent.message": EventType.AGENT_RESPONSE,
-
         "decision": EventType.AGENT_DECISION,
         "agent_decision": EventType.AGENT_DECISION,
-
         "tool_call": EventType.TOOL_CALL,
         "tool.call": EventType.TOOL_CALL,
-
         "tool_result": EventType.TOOL_RESULT,
         "tool.result": EventType.TOOL_RESULT,
-
         "content_retrieved": EventType.CONTENT_RETRIEVED,
         "retrieval": EventType.CONTENT_RETRIEVED,
-
         "untrusted_content": EventType.UNTRUSTED_CONTENT,
-
         "prompt_injection": EventType.PROMPT_INJECTION_DETECTED,
         "prompt_injection_detected": EventType.PROMPT_INJECTION_DETECTED,
-
         "sensitive_action": EventType.SENSITIVE_ACTION_ATTEMPTED,
         "sensitive_action_attempted": EventType.SENSITIVE_ACTION_ATTEMPTED,
-
         "policy_evaluation": EventType.POLICY_EVALUATION,
         "policy_violation": EventType.POLICY_VIOLATION,
-
         "tool_blocked": EventType.TOOL_BLOCKED,
         "tool_allowed": EventType.TOOL_ALLOWED,
-
         "error": EventType.ERROR,
     }
 
@@ -78,10 +67,9 @@ class EventNormalizer:
 
         event_id = self._required_string(payload.get("event_id"), "event_id")
 
-        agent_id = (
-            self._optional_string(payload.get("agent_id"))
-            or self._optional_string(default_agent_id)
-        )
+        agent_id = self._optional_string(
+            payload.get("agent_id")
+        ) or self._optional_string(default_agent_id)
 
         if not agent_id:
             raise EventNormalizationError(
@@ -143,12 +131,8 @@ class EventNormalizer:
             severity=severity,
             details=details,
             metadata=metadata,
-            parent_event_id=self._optional_string(
-                payload.get("parent_event_id")
-            ),
-            related_event_id=self._optional_string(
-                payload.get("related_event_id")
-            ),
+            parent_event_id=self._optional_string(payload.get("parent_event_id")),
+            related_event_id=self._optional_string(payload.get("related_event_id")),
             trace_id=self._optional_string(payload.get("trace_id")),
             span_id=self._optional_string(payload.get("span_id")),
         )
@@ -185,9 +169,7 @@ class EventNormalizer:
         try:
             return EventType(raw.strip().upper())
         except ValueError as exc:
-            raise EventNormalizationError(
-                f"Unsupported event_type: {value!r}"
-            ) from exc
+            raise EventNormalizationError(f"Unsupported event_type: {value!r}") from exc
 
     @staticmethod
     def _normalize_enum(
@@ -226,9 +208,7 @@ class EventNormalizer:
             try:
                 timestamp = datetime.fromisoformat(raw)
             except ValueError as exc:
-                raise EventNormalizationError(
-                    f"Invalid timestamp: {value!r}"
-                ) from exc
+                raise EventNormalizationError(f"Invalid timestamp: {value!r}") from exc
         else:
             raise EventNormalizationError(
                 "timestamp must be a datetime or ISO-8601 string"
@@ -244,9 +224,7 @@ class EventNormalizer:
         result = EventNormalizer._optional_string(value)
 
         if not result:
-            raise EventNormalizationError(
-                f"{field_name} is required"
-            )
+            raise EventNormalizationError(f"{field_name} is required")
 
         return result
 

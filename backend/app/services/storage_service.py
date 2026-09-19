@@ -29,9 +29,7 @@ class StorageService:
                 validate=True,
             )
         except (binascii.Error, ValueError) as exc:
-            raise ValueError(
-                "content_base64 is not valid Base64"
-            ) from exc
+            raise ValueError("content_base64 is not valid Base64") from exc
 
         return await self.storage.save(
             artifact_id=artifact_id,

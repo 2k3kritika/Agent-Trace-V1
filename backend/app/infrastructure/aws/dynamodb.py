@@ -44,9 +44,7 @@ def get_dynamodb_table():
     settings = get_settings()
 
     if not settings.dynamodb_table:
-        raise RuntimeError(
-            "DYNAMODB_TABLE is not configured."
-        )
+        raise RuntimeError("DYNAMODB_TABLE is not configured.")
 
     resource = get_dynamodb_resource()
 

@@ -3,8 +3,6 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-from sqlalchemy import func, select
-
 from app.infrastructure.postgres.models import (
     Agent,
     Alert,
@@ -13,35 +11,28 @@ from app.infrastructure.postgres.models import (
     Session,
 )
 from app.infrastructure.postgres.session import session_scope
+from sqlalchemy import func, select
 
 
 class PostgresDashboardRepository:
     async def count_agents(self) -> int:
         async with session_scope() as db:
-            result = await db.execute(
-                select(func.count()).select_from(Agent)
-            )
+            result = await db.execute(select(func.count()).select_from(Agent))
             return int(result.scalar_one())
 
     async def count_sessions(self) -> int:
         async with session_scope() as db:
-            result = await db.execute(
-                select(func.count()).select_from(Session)
-            )
+            result = await db.execute(select(func.count()).select_from(Session))
             return int(result.scalar_one())
 
     async def count_investigations(self) -> int:
         async with session_scope() as db:
-            result = await db.execute(
-                select(func.count()).select_from(Investigation)
-            )
+            result = await db.execute(select(func.count()).select_from(Investigation))
             return int(result.scalar_one())
 
     async def count_alerts(self) -> int:
         async with session_scope() as db:
-            result = await db.execute(
-                select(func.count()).select_from(Alert)
-            )
+            result = await db.execute(select(func.count()).select_from(Alert))
             return int(result.scalar_one())
 
     async def count_security_events_last_24h(self) -> int:
@@ -73,8 +64,7 @@ class PostgresDashboardRepository:
                 select(
                     Investigation.risk_level,
                     func.count(Investigation.id),
-                )
-                .group_by(Investigation.risk_level)
+                ).group_by(Investigation.risk_level)
             )
 
             return {

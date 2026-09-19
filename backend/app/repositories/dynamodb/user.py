@@ -54,9 +54,7 @@ class DynamoDBUserRepository(UserRepository):
             "display_name": user.display_name,
             "is_active": user.is_active,
             "role": (
-                user.role.value
-                if hasattr(user.role, "value")
-                else str(user.role)
+                user.role.value if hasattr(user.role, "value") else str(user.role)
             ),
         }
 

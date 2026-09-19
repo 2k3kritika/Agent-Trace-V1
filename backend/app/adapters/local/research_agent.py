@@ -30,50 +30,31 @@ class ResearchAgentAdapter(GenericLocalAdapter):
     _EVENT_ALIASES: ClassVar[dict[str, str]] = {
         "agent_started": "AGENT_STARTED",
         "started": "AGENT_STARTED",
-
         "user_request": "USER_REQUEST",
         "user_message": "USER_REQUEST",
         "request": "USER_REQUEST",
-
         "tool_call": "TOOL_CALL",
         "tool_invocation": "TOOL_CALL",
         "search": "TOOL_CALL",
         "web_search": "TOOL_CALL",
         "fetch": "TOOL_CALL",
-
         "tool_result": "TOOL_RESULT",
         "tool_response": "TOOL_RESULT",
-
         "content_retrieved": "CONTENT_RETRIEVED",
         "retrieved_content": "CONTENT_RETRIEVED",
         "external_content": "CONTENT_RETRIEVED",
-
         "untrusted_content": "UNTRUSTED_CONTENT",
         "untrusted": "UNTRUSTED_CONTENT",
-
-        "prompt_injection_detected": (
-            "PROMPT_INJECTION_DETECTED"
-        ),
-        "prompt_injection": (
-            "PROMPT_INJECTION_DETECTED"
-        ),
-
+        "prompt_injection_detected": ("PROMPT_INJECTION_DETECTED"),
+        "prompt_injection": ("PROMPT_INJECTION_DETECTED"),
         "agent_decision": "AGENT_DECISION",
         "decision": "AGENT_DECISION",
-
-        "sensitive_action_attempted": (
-            "SENSITIVE_ACTION_ATTEMPTED"
-        ),
-        "sensitive_action": (
-            "SENSITIVE_ACTION_ATTEMPTED"
-        ),
-
+        "sensitive_action_attempted": ("SENSITIVE_ACTION_ATTEMPTED"),
+        "sensitive_action": ("SENSITIVE_ACTION_ATTEMPTED"),
         "tool_simulated": "TOOL_RESULT",
         "simulated_tool_result": "TOOL_RESULT",
-
         "agent_completed": "AGENT_COMPLETED",
         "completed": "AGENT_COMPLETED",
-
         "error": "ERROR",
     }
 
@@ -102,10 +83,7 @@ class ResearchAgentAdapter(GenericLocalAdapter):
         event = dict(raw_event)
 
         raw_type = str(
-            event.get("event_type")
-            or event.get("type")
-            or event.get("name")
-            or ""
+            event.get("event_type") or event.get("type") or event.get("name") or ""
         ).strip()
 
         canonical_type = self._EVENT_ALIASES.get(
@@ -115,45 +93,27 @@ class ResearchAgentAdapter(GenericLocalAdapter):
 
         event["event_type"] = canonical_type
 
-        raw_status = str(
-            event.get("status")
-            or "RECEIVED"
-        ).strip()
+        raw_status = str(event.get("status") or "RECEIVED").strip()
 
         event["status"] = self._STATUS_ALIASES.get(
             raw_status.lower(),
             raw_status.upper(),
         )
 
-        event["agent_id"] = (
-            event.get("agent_id")
-            or agent_id
-            or "research-agent"
-        )
+        event["agent_id"] = event.get("agent_id") or agent_id or "research-agent"
 
         event["provider"] = "local"
 
-        event["source"] = (
-            event.get("source")
-            or "research_agent_adapter"
-        )
+        event["source"] = event.get("source") or "research_agent_adapter"
 
-        details = dict(
-            event.get("details")
-            or {}
-        )
+        details = dict(event.get("details") or {})
 
-        metadata = dict(
-            event.get("metadata")
-            or {}
-        )
+        metadata = dict(event.get("metadata") or {})
 
         metadata.update(
             {
                 "adapter": self.adapter_name,
-                "provider_display_name": (
-                    "Local Python Research Agent"
-                ),
+                "provider_display_name": ("Local Python Research Agent"),
             }
         )
 

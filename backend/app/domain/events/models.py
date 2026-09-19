@@ -106,9 +106,7 @@ class CanonicalEvent:
             (event_id, relationship_type)
         """
 
-        relationships: list[
-            tuple[str, EventRelationshipType]
-        ] = []
+        relationships: list[tuple[str, EventRelationshipType]] = []
 
         if self.parent_event_id:
             relationships.append(

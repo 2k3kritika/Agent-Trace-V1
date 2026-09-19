@@ -55,62 +55,30 @@ class GenericLocalAdapter(AgentAdapter):
     ) -> dict[str, Any]:
         event = dict(raw_event)
 
-        event["event_id"] = (
-            event.get("event_id")
-            or event.get("id")
-        )
+        event["event_id"] = event.get("event_id") or event.get("id")
 
         event["timestamp"] = (
-            event.get("timestamp")
-            or event.get("time")
-            or event.get("created_at")
+            event.get("timestamp") or event.get("time") or event.get("created_at")
         )
 
-        event["session_id"] = (
-            event.get("session_id")
-            or session_id
-        )
+        event["session_id"] = event.get("session_id") or session_id
 
-        event["agent_id"] = (
-            event.get("agent_id")
-            or event.get("agent")
-            or agent_id
-        )
+        event["agent_id"] = event.get("agent_id") or event.get("agent") or agent_id
 
-        event["provider"] = (
-            event.get("provider")
-            or "local"
-        )
+        event["provider"] = event.get("provider") or "local"
 
-        event["source"] = (
-            event.get("source")
-            or "local_adapter"
-        )
+        event["source"] = event.get("source") or "local_adapter"
 
         event["event_type"] = (
-            event.get("event_type")
-            or event.get("type")
-            or event.get("name")
+            event.get("event_type") or event.get("type") or event.get("name")
         )
 
-        event["status"] = (
-            event.get("status")
-            or "RECEIVED"
-        )
+        event["status"] = event.get("status") or "RECEIVED"
 
-        event["severity"] = (
-            event.get("severity")
-            or "LOW"
-        )
+        event["severity"] = event.get("severity") or "LOW"
 
-        event["details"] = (
-            event.get("details")
-            or {}
-        )
+        event["details"] = event.get("details") or {}
 
-        event["metadata"] = (
-            event.get("metadata")
-            or {}
-        )
+        event["metadata"] = event.get("metadata") or {}
 
         return event

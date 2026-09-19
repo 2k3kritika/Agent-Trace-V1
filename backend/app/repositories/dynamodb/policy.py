@@ -128,11 +128,7 @@ class DynamoDBPolicyRepository(PolicyRepository):
             ]
 
             if status:
-                items = [
-                    item
-                    for item in items
-                    if item.get("status") == status
-                ]
+                items = [item for item in items if item.get("status") == status]
 
             return sorted(
                 items,
@@ -145,9 +141,6 @@ class DynamoDBPolicyRepository(PolicyRepository):
         start = max(page - 1, 0) * page_size
 
         return RepositoryListResult(
-            items=[
-                self._to_dict(item)
-                for item in items[start:start + page_size]
-            ],
+            items=[self._to_dict(item) for item in items[start : start + page_size]],
             total=total,
         )

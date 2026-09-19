@@ -1,7 +1,6 @@
 from datetime import datetime, timezone
 
 import pytest
-
 from app.domain.events.normalizer import (
     EventNormalizationError,
     EventNormalizer,
@@ -47,7 +46,7 @@ def test_normalizes_naive_timestamp():
         "event_id": "evt-002",
         "agent_id": "agent-002",
         "event_type": "TOOL_CALL",
-        "timestamp": datetime(2026, 9, 18, 10, 0, 0),
+        "timestamp": datetime(2026, 9, 18, 10, 0, 0, tzinfo=timezone.utc),
     }
 
     event = EventNormalizer().normalize(payload)

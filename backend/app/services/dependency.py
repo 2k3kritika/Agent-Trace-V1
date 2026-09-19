@@ -5,20 +5,17 @@ from typing import Any
 from fastapi import Depends
 
 from app.infrastructure.storage.factory import create_artifact_storage
-
 from app.repositories.provider import (
     get_agent_repository,
     get_alert_repository,
-    get_evidence_repository,
     get_event_repository,
+    get_evidence_repository,
     get_integration_repository,
     get_investigation_repository,
-    get_policy_repository,
     get_report_repository,
     get_session_repository,
     get_user_repository,
 )
-
 from app.services.adapter_service import AdapterService
 from app.services.agent_service import AgentService
 from app.services.alert_service import AlertService
@@ -29,8 +26,8 @@ from app.services.correlation_service import CorrelationService
 from app.services.dashboard_service import DashboardService
 from app.services.demo_scenario_service import DemoScenarioService
 from app.services.detection_service import DetectionService
-from app.services.evidence_service import EvidenceService
 from app.services.event_service import EventService
+from app.services.evidence_service import EvidenceService
 from app.services.forensic_service import ForensicService
 from app.services.integration_service import IntegrationService
 from app.services.investigation_forensic_service import (
@@ -43,7 +40,6 @@ from app.services.risk_service import RiskService
 from app.services.session_service import SessionService
 from app.services.storage_service import StorageService
 from app.services.telemetry_service import TelemetryService
-
 
 # ---------------------------------------------------------------------------
 # Repository-backed services
@@ -180,15 +176,14 @@ def get_dashboard_service() -> DashboardService:
         dashboard_repository=PostgresDashboardRepository(),
     )
 
+
 # ---------------------------------------------------------------------------
 # Investigation forensic service
 # ---------------------------------------------------------------------------
 
 
 def get_investigation_forensic_service(
-    investigation_service: InvestigationService = Depends(
-        get_investigation_service
-    ),
+    investigation_service: InvestigationService = Depends(get_investigation_service),
     event_service: EventService = Depends(get_event_service),
     evidence_service: EvidenceService = Depends(get_evidence_service),
     forensic_service: ForensicService = Depends(get_forensic_service),
@@ -211,9 +206,7 @@ def get_demo_scenario_service(
     detection_service: DetectionService = Depends(get_detection_service),
     policy_service: PolicyService = Depends(get_policy_service),
     risk_service: RiskService = Depends(get_risk_service),
-    investigation_service: InvestigationService = Depends(
-        get_investigation_service
-    ),
+    investigation_service: InvestigationService = Depends(get_investigation_service),
     forensic_service: ForensicService = Depends(get_forensic_service),
 ) -> DemoScenarioService:
     return DemoScenarioService(

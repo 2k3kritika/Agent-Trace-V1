@@ -18,6 +18,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 aws_endpoint_url: str | None = None
 dynamodb_table: str = "agenttrace"
 
+
 class Settings(BaseSettings):
     """Runtime configuration for AgentTrace."""
 

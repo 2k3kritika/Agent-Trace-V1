@@ -2,12 +2,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import Depends
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.core.config import get_settings
 from app.infrastructure.postgres.session import get_repository_session
-
 from app.repositories.postgres.agent import PostgresAgentRepository
 from app.repositories.postgres.alert import PostgresAlertRepository
 from app.repositories.postgres.event import PostgresEventRepository
@@ -20,6 +16,8 @@ from app.repositories.postgres.policy import PostgresPolicyRepository
 from app.repositories.postgres.report import PostgresReportRepository
 from app.repositories.postgres.session import PostgresSessionRepository
 from app.repositories.postgres.user import PostgresUserRepository
+from fastapi import Depends
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class RepositoryProvider:

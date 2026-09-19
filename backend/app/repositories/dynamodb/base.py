@@ -5,7 +5,6 @@ from typing import Any, Generic, TypeVar
 
 from app.infrastructure.aws.dynamodb import get_dynamodb_table
 
-
 T = TypeVar("T")
 
 
@@ -93,9 +92,7 @@ class DynamoDBRepository(Generic[T]):
         }
 
         if begins_with:
-            kwargs["KeyConditionExpression"] = (
-                "PK = :pk AND begins_with(SK, :sk)"
-            )
+            kwargs["KeyConditionExpression"] = "PK = :pk AND begins_with(SK, :sk)"
             kwargs["ExpressionAttributeValues"][":sk"] = begins_with
 
         if limit is not None:

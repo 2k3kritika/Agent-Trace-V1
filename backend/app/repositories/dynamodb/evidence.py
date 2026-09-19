@@ -71,10 +71,7 @@ class DynamoDBEvidenceRepository(EvidenceRepository):
     async def get_by_id(self, evidence_id: str) -> Any:
         response = await asyncio.to_thread(
             self.table.scan,
-            FilterExpression=(
-                "entity_type = :entity_type "
-                "AND entity_id = :entity_id"
-            ),
+            FilterExpression=("entity_type = :entity_type AND entity_id = :entity_id"),
             ExpressionAttributeValues={
                 ":entity_type": "evidence",
                 ":entity_id": evidence_id,
@@ -84,9 +81,7 @@ class DynamoDBEvidenceRepository(EvidenceRepository):
         items = response.get("Items", [])
 
         if not items:
-            raise KeyError(
-                f"Evidence '{evidence_id}' was not found"
-            )
+            raise KeyError(f"Evidence '{evidence_id}' was not found")
 
         return self._to_dict(items[0])
 
@@ -96,10 +91,7 @@ class DynamoDBEvidenceRepository(EvidenceRepository):
     ) -> Any | None:
         response = await asyncio.to_thread(
             self.table.scan,
-            FilterExpression=(
-                "entity_type = :entity_type "
-                "AND entity_id = :entity_id"
-            ),
+            FilterExpression=("entity_type = :entity_type AND entity_id = :entity_id"),
             ExpressionAttributeValues={
                 ":entity_type": "evidence",
                 ":entity_id": evidence_id,
@@ -168,9 +160,7 @@ class DynamoDBEvidenceRepository(EvidenceRepository):
     ) -> list[Any]:
         def operation() -> list[dict[str, Any]]:
             response = self.table.query(
-                KeyConditionExpression=(
-                    "PK = :pk AND begins_with(SK, :prefix)"
-                ),
+                KeyConditionExpression=("PK = :pk AND begins_with(SK, :prefix)"),
                 ExpressionAttributeValues={
                     ":pk": f"INVESTIGATION#{investigation_id}",
                     ":prefix": "EVIDENCE#",
@@ -181,10 +171,7 @@ class DynamoDBEvidenceRepository(EvidenceRepository):
 
         items = await asyncio.to_thread(operation)
 
-        return [
-            self._to_dict(item)
-            for item in items
-        ]
+        return [self._to_dict(item) for item in items]
 
     async def list_page(
         self,
@@ -195,10 +182,9 @@ class DynamoDBEvidenceRepository(EvidenceRepository):
         evidence_type: str | None = None,
     ) -> RepositoryListResult[Any]:
         if investigation_id:
-            items = await self.get_by_investigation(
-                investigation_id
-            )
+            items = await self.get_by_investigation(investigation_id)
         else:
+
             def operation() -> list[dict[str, Any]]:
                 response = self.table.scan()
 
@@ -210,22 +196,17 @@ class DynamoDBEvidenceRepository(EvidenceRepository):
 
             raw_items = await asyncio.to_thread(operation)
 
-            items = [
-                self._to_dict(item)
-                for item in raw_items
-            ]
+            items = [self._to_dict(item) for item in raw_items]
 
         if evidence_type:
             items = [
-                item
-                for item in items
-                if item.get("evidence_type") == evidence_type
+                item for item in items if item.get("evidence_type") == evidence_type
             ]
 
         total = len(items)
         start = max(page - 1, 0) * page_size
 
         return RepositoryListResult(
-            items=items[start:start + page_size],
+            items=items[start : start + page_size],
             total=total,
         )

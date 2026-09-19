@@ -49,15 +49,9 @@ class DynamoDBInvestigationRepository(InvestigationRepository):
             "sensitive_action_executed": bool(
                 item.get("sensitive_action_executed", False)
             ),
-            "policy_violation": bool(
-                item.get("policy_violation", False)
-            ),
-            "action_blocked": bool(
-                item.get("action_blocked", False)
-            ),
-            "external_transmission": bool(
-                item.get("external_transmission", False)
-            ),
+            "policy_violation": bool(item.get("policy_violation", False)),
+            "action_blocked": bool(item.get("action_blocked", False)),
+            "external_transmission": bool(item.get("external_transmission", False)),
             "summary": item.get("summary", {}),
             "graph": item.get("graph", {}),
         }
@@ -88,14 +82,10 @@ class DynamoDBInvestigationRepository(InvestigationRepository):
             "sensitive_action_attempted": bool(
                 investigation.sensitive_action_attempted
             ),
-            "sensitive_action_executed": bool(
-                investigation.sensitive_action_executed
-            ),
+            "sensitive_action_executed": bool(investigation.sensitive_action_executed),
             "policy_violation": bool(investigation.policy_violation),
             "action_blocked": bool(investigation.action_blocked),
-            "external_transmission": bool(
-                investigation.external_transmission
-            ),
+            "external_transmission": bool(investigation.external_transmission),
             "summary": investigation.summary or {},
             "graph": investigation.graph or {},
         }
@@ -104,9 +94,7 @@ class DynamoDBInvestigationRepository(InvestigationRepository):
         result = await self.get_optional_by_id(investigation_id)
 
         if result is None:
-            raise KeyError(
-                f"Investigation '{investigation_id}' was not found"
-            )
+            raise KeyError(f"Investigation '{investigation_id}' was not found")
 
         return result
 
@@ -182,32 +170,16 @@ class DynamoDBInvestigationRepository(InvestigationRepository):
             ]
 
             if agent_id:
-                items = [
-                    item
-                    for item in items
-                    if item.get("agent_id") == agent_id
-                ]
+                items = [item for item in items if item.get("agent_id") == agent_id]
 
             if session_id:
-                items = [
-                    item
-                    for item in items
-                    if item.get("session_id") == session_id
-                ]
+                items = [item for item in items if item.get("session_id") == session_id]
 
             if status:
-                items = [
-                    item
-                    for item in items
-                    if item.get("status") == status
-                ]
+                items = [item for item in items if item.get("status") == status]
 
             if risk_level:
-                items = [
-                    item
-                    for item in items
-                    if item.get("risk_level") == risk_level
-                ]
+                items = [item for item in items if item.get("risk_level") == risk_level]
 
             return items
 
@@ -217,9 +189,6 @@ class DynamoDBInvestigationRepository(InvestigationRepository):
         start = max(page - 1, 0) * page_size
 
         return RepositoryListResult(
-            items=[
-                self._to_dict(item)
-                for item in items[start:start + page_size]
-            ],
+            items=[self._to_dict(item) for item in items[start : start + page_size]],
             total=total,
         )

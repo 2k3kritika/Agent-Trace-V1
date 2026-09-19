@@ -11,7 +11,6 @@ from app.repositories.postgres.session import PostgresSessionRepository
 from app.repositories.postgres.user import PostgresUserRepository
 
 __all__ = [
-    "PostgresRepository",
     "PostgresAgentRepository",
     "PostgresAlertRepository",
     "PostgresEventRepository",
@@ -20,6 +19,7 @@ __all__ = [
     "PostgresInvestigationRepository",
     "PostgresPolicyRepository",
     "PostgresReportRepository",
+    "PostgresRepository",
     "PostgresSessionRepository",
     "PostgresUserRepository",
 ]

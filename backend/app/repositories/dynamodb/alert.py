@@ -145,34 +145,23 @@ class DynamoDBAlertRepository(AlertRepository):
             ]
 
             if agent_id:
-                items = [
-                    item for item in items
-                    if item.get("agent_id") == agent_id
-                ]
+                items = [item for item in items if item.get("agent_id") == agent_id]
 
             if session_id:
-                items = [
-                    item for item in items
-                    if item.get("session_id") == session_id
-                ]
+                items = [item for item in items if item.get("session_id") == session_id]
 
             if investigation_id:
                 items = [
-                    item for item in items
+                    item
+                    for item in items
                     if item.get("investigation_id") == investigation_id
                 ]
 
             if severity:
-                items = [
-                    item for item in items
-                    if item.get("severity") == severity
-                ]
+                items = [item for item in items if item.get("severity") == severity]
 
             if status:
-                items = [
-                    item for item in items
-                    if item.get("status") == status
-                ]
+                items = [item for item in items if item.get("status") == status]
 
             return items
 
@@ -182,9 +171,6 @@ class DynamoDBAlertRepository(AlertRepository):
         start = max(page - 1, 0) * page_size
 
         return RepositoryListResult(
-            items=[
-                self._to_dict(item)
-                for item in items[start:start + page_size]
-            ],
+            items=[self._to_dict(item) for item in items[start : start + page_size]],
             total=total,
         )

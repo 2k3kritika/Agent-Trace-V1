@@ -9,7 +9,6 @@ from app.schemas.common import APIModel
 from app.services.adapter_service import AdapterService
 from app.services.dependency import get_event_service
 
-
 router = APIRouter(
     prefix="/adapters",
     tags=["adapters"],
@@ -154,7 +153,7 @@ async def ingest_adapter_events(
                         default_session_id=request.session_id,
                     )
                     results.append(result)
-                except Exception as exc:
+                except Exception as exc:  # noqa: BLE001
                     results.append(
                         {
                             "success": False,

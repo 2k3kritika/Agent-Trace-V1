@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any
+from typing import Any, ClassVar
 
-from app.adapters.base import AgentAdapter, AdapterConnectionResult, AdapterHealthResult
+from app.adapters.base import AdapterConnectionResult, AdapterHealthResult, AgentAdapter
 from app.domain.events.models import CanonicalEvent
 from app.domain.events.normalizer import EventNormalizer
 
@@ -23,7 +23,7 @@ class GeminiAdapter(AgentAdapter):
     provider = "google_gemini"
     display_name = "Google Gemini"
 
-    _EVENT_TYPE_ALIASES = {
+    _EVENT_TYPE_ALIASES: ClassVar[dict[str, str]] = {
         "request": "USER_REQUEST",
         "user_request": "USER_REQUEST",
         "prompt": "USER_REQUEST",
@@ -101,9 +101,7 @@ class GeminiAdapter(AgentAdapter):
         payload = dict(raw_event)
 
         event_type = self._event_type(
-            payload.get("event_type")
-            or payload.get("type")
-            or payload.get("event")
+            payload.get("event_type") or payload.get("type") or payload.get("event")
         )
 
         details = dict(payload.get("details") or {})
@@ -169,7 +167,9 @@ class GeminiAdapter(AgentAdapter):
             default_provider="google_gemini",
         )
 
-    def validate_connection(self, configuration: Mapping[str, Any] | None = None) -> AdapterConnectionResult:
+    def validate_connection(
+        self, configuration: Mapping[str, Any] | None = None
+    ) -> AdapterConnectionResult:
         configuration = configuration or {}
 
         if configuration.get("api_key") or configuration.get("api_key_reference"):

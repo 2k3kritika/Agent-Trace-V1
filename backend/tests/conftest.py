@@ -4,7 +4,6 @@ import os
 
 import pytest
 
-
 os.environ.setdefault("APP_ENV", "test")
 os.environ.setdefault("DEBUG", "false")
 os.environ.setdefault("AUTH_ENABLED", "false")

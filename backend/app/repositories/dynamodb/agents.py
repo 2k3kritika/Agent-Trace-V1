@@ -28,21 +28,15 @@ class DynamoDBAgentRepository(DynamoDBRepository[Any]):
             "risk_score": entity.risk_score,
             "risk_level": entity.risk_level,
             "last_seen": (
-                entity.last_seen.isoformat()
-                if entity.last_seen is not None
-                else None
+                entity.last_seen.isoformat() if entity.last_seen is not None else None
             ),
             "integration_type": entity.integration_type,
             "capabilities": entity.capabilities or {},
             "created_at": (
-                entity.created_at.isoformat()
-                if entity.created_at is not None
-                else None
+                entity.created_at.isoformat() if entity.created_at is not None else None
             ),
             "updated_at": (
-                entity.updated_at.isoformat()
-                if entity.updated_at is not None
-                else None
+                entity.updated_at.isoformat() if entity.updated_at is not None else None
             ),
         }
 
@@ -113,9 +107,7 @@ class DynamoDBAgentRepository(DynamoDBRepository[Any]):
         try:
             self.put_item_if_absent_sync(item)
         except Exception as exc:
-            raise ValueError(
-                f"Agent '{entity.agent_id}' already exists."
-            ) from exc
+            raise ValueError(f"Agent '{entity.agent_id}' already exists.") from exc
 
         return entity
 

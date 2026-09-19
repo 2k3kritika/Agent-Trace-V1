@@ -134,17 +134,11 @@ class DynamoDBReportRepository(ReportRepository):
 
             if report_type:
                 items = [
-                    item
-                    for item in items
-                    if item.get("report_type") == report_type
+                    item for item in items if item.get("report_type") == report_type
                 ]
 
             if status:
-                items = [
-                    item
-                    for item in items
-                    if item.get("status") == status
-                ]
+                items = [item for item in items if item.get("status") == status]
 
             return items
 
@@ -154,9 +148,6 @@ class DynamoDBReportRepository(ReportRepository):
         start = max(page - 1, 0) * page_size
 
         return RepositoryListResult(
-            items=[
-                self._to_dict(item)
-                for item in items[start:start + page_size]
-            ],
+            items=[self._to_dict(item) for item in items[start : start + page_size]],
             total=total,
         )

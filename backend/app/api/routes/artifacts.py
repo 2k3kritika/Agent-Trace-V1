@@ -11,7 +11,6 @@ from app.schemas.artifacts import (
 from app.services.artifact_service import ArtifactService
 from app.services.dependency import get_artifact_service
 
-
 router = APIRouter(
     prefix="/artifacts",
     tags=["Artifacts"],

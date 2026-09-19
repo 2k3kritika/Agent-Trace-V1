@@ -10,7 +10,6 @@ from app.schemas.evidence import (
 from app.services.dependency import get_evidence_service
 from app.services.evidence_service import EvidenceService
 
-
 router = APIRouter(
     prefix="/evidence",
     tags=["Evidence"],
@@ -102,6 +101,4 @@ async def delete_evidence(
 ) -> MessageResponse:
     await service.delete_evidence(evidence_id)
 
-    return MessageResponse(
-        message="Evidence deleted successfully."
-    )
+    return MessageResponse(message="Evidence deleted successfully.")

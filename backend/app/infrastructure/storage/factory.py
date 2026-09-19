@@ -6,7 +6,6 @@ from app.core.config import get_settings
 from app.infrastructure.storage.local import LocalArtifactStorage
 from app.infrastructure.storage.s3 import S3ArtifactStorage
 
-
 StorageProvider = Literal["local", "s3"]
 
 
@@ -21,9 +20,7 @@ def get_storage_provider() -> StorageProvider:
     if provider == "postgres":
         return "local"
 
-    raise ValueError(
-        f"Unsupported STORAGE_BACKEND: {settings.storage_backend}"
-    )
+    raise ValueError(f"Unsupported STORAGE_BACKEND: {settings.storage_backend}")
 
 
 def create_artifact_storage():

@@ -21,26 +21,17 @@ class NovaAdapter(GenericLocalAdapter):
     _EVENT_ALIASES: ClassVar[dict[str, str]] = {
         "agent_started": "AGENT_STARTED",
         "started": "AGENT_STARTED",
-
         "user_request": "USER_REQUEST",
         "user_message": "USER_REQUEST",
-
         "tool_call": "TOOL_CALL",
         "tool_invocation": "TOOL_CALL",
-
         "tool_result": "TOOL_RESULT",
         "tool_response": "TOOL_RESULT",
-
         "content_retrieved": "CONTENT_RETRIEVED",
         "retrieved_content": "CONTENT_RETRIEVED",
-
         "agent_decision": "AGENT_DECISION",
         "decision": "AGENT_DECISION",
-
-        "sensitive_action_attempted": (
-            "SENSITIVE_ACTION_ATTEMPTED"
-        ),
-
+        "sensitive_action_attempted": ("SENSITIVE_ACTION_ATTEMPTED"),
         "agent_completed": "AGENT_COMPLETED",
         "completed": "AGENT_COMPLETED",
     }
@@ -55,10 +46,7 @@ class NovaAdapter(GenericLocalAdapter):
         event = dict(raw_event)
 
         raw_type = str(
-            event.get("event_type")
-            or event.get("type")
-            or event.get("name")
-            or ""
+            event.get("event_type") or event.get("type") or event.get("name") or ""
         ).strip()
 
         canonical_type = self._EVENT_ALIASES.get(
@@ -68,23 +56,13 @@ class NovaAdapter(GenericLocalAdapter):
 
         event["event_type"] = canonical_type
 
-        event["agent_id"] = (
-            event.get("agent_id")
-            or agent_id
-            or "nova"
-        )
+        event["agent_id"] = event.get("agent_id") or agent_id or "nova"
 
         event["provider"] = "local"
 
-        event["source"] = (
-            event.get("source")
-            or "nova_adapter"
-        )
+        event["source"] = event.get("source") or "nova_adapter"
 
-        metadata = dict(
-            event.get("metadata")
-            or {}
-        )
+        metadata = dict(event.get("metadata") or {})
 
         metadata.update(
             {

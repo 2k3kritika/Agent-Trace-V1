@@ -3,10 +3,8 @@ from __future__ import annotations
 import asyncio
 import hashlib
 from dataclasses import dataclass
-from typing import BinaryIO
 
 import boto3
-
 from app.core.config import get_settings
 
 
@@ -133,22 +131,16 @@ class S3ArtifactStorage:
         prefix = "s3://"
 
         if not storage_uri.startswith(prefix):
-            raise ValueError(
-                "Invalid S3 storage URI. Expected s3://bucket/key"
-            )
+            raise ValueError("Invalid S3 storage URI. Expected s3://bucket/key")
 
-        value = storage_uri[len(prefix):]
+        value = storage_uri[len(prefix) :]
 
         bucket, separator, key = value.partition("/")
 
         if not separator or not bucket or not key:
-            raise ValueError(
-                "Invalid S3 storage URI. Expected s3://bucket/key"
-            )
+            raise ValueError("Invalid S3 storage URI. Expected s3://bucket/key")
 
         if bucket != self.bucket_name:
-            raise ValueError(
-                "Storage URI points to an unexpected bucket"
-            )
+            raise ValueError("Storage URI points to an unexpected bucket")
 
         return bucket, key

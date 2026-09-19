@@ -2,10 +2,9 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.routes import adapters
-from app.api.routes import demo
 
 from app.api.routes import (
+    adapters,
     agents,
     alerts,
     artifacts,
@@ -13,6 +12,7 @@ from app.api.routes import (
     auth,
     correlation,
     dashboard,
+    demo,
     detection,
     events,
     evidence,
@@ -99,14 +99,16 @@ app.include_router(auth.router)
 app.include_router(audit.router)
 app.include_router(demo.router)
 
+
 @app.get("/", tags=["Root"])
 async def root() -> dict[str, str]:
     """
     Basic API discovery endpoint.
     """
     return {
-        "service": settings.app_name,
+        "name": "AgentTrace",
+        "service": "AgentTrace",
         "version": "0.1.0",
-        "status": "running",
+        "status": "ok",
         "docs": "/docs",
     }

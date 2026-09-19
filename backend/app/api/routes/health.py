@@ -35,5 +35,5 @@ async def liveness_check() -> dict[str, str]:
     Returns successfully as long as the FastAPI application is running.
     """
     return {
-        "status": "alive",
+        "status": "ok",
     }

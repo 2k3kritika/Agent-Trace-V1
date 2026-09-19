@@ -11,7 +11,6 @@ from app.repositories.dynamodb.session import DynamoDBSessionRepository
 from app.repositories.dynamodb.user import DynamoDBUserRepository
 
 __all__ = [
-    "DynamoDBRepository",
     "DynamoDBAgentRepository",
     "DynamoDBAlertRepository",
     "DynamoDBEventRepository",
@@ -20,6 +19,7 @@ __all__ = [
     "DynamoDBInvestigationRepository",
     "DynamoDBPolicyRepository",
     "DynamoDBReportRepository",
+    "DynamoDBRepository",
     "DynamoDBSessionRepository",
     "DynamoDBUserRepository",
 ]
