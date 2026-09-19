@@ -10,10 +10,9 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from pydantic import Field, field_validator
-
 from app.schemas.common import APIModel, FlexibleAPIModel
 from app.schemas.events import CanonicalEventCreate
+from pydantic import Field, field_validator
 
 
 class TelemetryEventRequest(FlexibleAPIModel):

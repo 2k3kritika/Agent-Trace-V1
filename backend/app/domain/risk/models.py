@@ -46,9 +46,7 @@ class RiskAssessment:
             "HIGH",
             "CRITICAL",
         }:
-            raise ValueError(
-                "Risk level must be LOW, MEDIUM, HIGH, or CRITICAL"
-            )
+            raise ValueError("Risk level must be LOW, MEDIUM, HIGH, or CRITICAL")
 
 
 @dataclass(slots=True)

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, ClassVar
 
 from app.domain.events.models import CanonicalEvent
 from app.domain.events.types import (
@@ -24,7 +24,7 @@ class EventNormalizer:
     The normalizer deliberately does not perform database operations.
     """
 
-    EVENT_TYPE_ALIASES: dict[str, EventType] = {
+    EVENT_TYPE_ALIASES: ClassVar[dict[str, EventType]] = {
         "agent_start": EventType.AGENT_STARTED,
         "agent_started": EventType.AGENT_STARTED,
         "agent_complete": EventType.AGENT_COMPLETED,
@@ -53,7 +53,7 @@ class EventNormalizer:
         "error": EventType.ERROR,
     }
 
-    STATUS_ALIASES: dict[str, EventStatus] = {
+    STATUS_ALIASES: ClassVar[dict[str, EventStatus]] = {
         "received": EventStatus.RECEIVED,
         "requested": EventStatus.REQUESTED,
         "started": EventStatus.STARTED,
@@ -67,7 +67,7 @@ class EventNormalizer:
         "completed": EventStatus.COMPLETED,
     }
 
-    SEVERITY_ALIASES: dict[str, EventSeverity] = {
+    SEVERITY_ALIASES: ClassVar[dict[str, EventSeverity]] = {
         "low": EventSeverity.LOW,
         "medium": EventSeverity.MEDIUM,
         "high": EventSeverity.HIGH,
@@ -83,22 +83,18 @@ class EventNormalizer:
         default_session_id: str | None = None,
     ) -> CanonicalEvent:
         if not isinstance(payload, Mapping):
-            raise EventNormalizationError(
-                "Telemetry event must be a mapping/object."
-            )
+            raise EventNormalizationError("Telemetry event must be a mapping/object.")
 
         event_id = self._required_string(
             payload,
             "event_id",
         )
 
-        agent_id = self._optional_string(
-            payload.get("agent_id")
-        ) or default_agent_id
+        agent_id = self._optional_string(payload.get("agent_id")) or default_agent_id
 
-        session_id = self._optional_string(
-            payload.get("session_id")
-        ) or default_session_id
+        session_id = (
+            self._optional_string(payload.get("session_id")) or default_session_id
+        )
 
         if not agent_id:
             raise EventNormalizationError(
@@ -109,17 +105,11 @@ class EventNormalizer:
             payload.get("event_type") or payload.get("type")
         )
 
-        status = self._normalize_status(
-            payload.get("status")
-        )
+        status = self._normalize_status(payload.get("status"))
 
-        severity = self._normalize_severity(
-            payload.get("severity")
-        )
+        severity = self._normalize_severity(payload.get("severity"))
 
-        timestamp = self._normalize_timestamp(
-            payload.get("timestamp")
-        )
+        timestamp = self._normalize_timestamp(payload.get("timestamp"))
 
         details = payload.get("details", {})
 
@@ -127,9 +117,7 @@ class EventNormalizer:
             details = {}
 
         if not isinstance(details, Mapping):
-            raise EventNormalizationError(
-                "Event 'details' must be an object."
-            )
+            raise EventNormalizationError("Event 'details' must be an object.")
 
         metadata = payload.get("metadata", {})
 
@@ -137,19 +125,14 @@ class EventNormalizer:
             metadata = {}
 
         if not isinstance(metadata, Mapping):
-            raise EventNormalizationError(
-                "Event 'metadata' must be an object."
-            )
+            raise EventNormalizationError("Event 'metadata' must be an object.")
 
         return CanonicalEvent(
             event_id=event_id,
             timestamp=timestamp,
             session_id=session_id,
             agent_id=agent_id,
-            provider=(
-                self._optional_string(payload.get("provider"))
-                or provider
-            ),
+            provider=(self._optional_string(payload.get("provider")) or provider),
             event_type=event_type,
             status=status,
             tool=self._optional_string(payload.get("tool")),
@@ -157,18 +140,10 @@ class EventNormalizer:
             severity=severity,
             details=dict(details),
             metadata=dict(metadata),
-            parent_event_id=self._optional_string(
-                payload.get("parent_event_id")
-            ),
-            related_event_id=self._optional_string(
-                payload.get("related_event_id")
-            ),
-            trace_id=self._optional_string(
-                payload.get("trace_id")
-            ),
-            span_id=self._optional_string(
-                payload.get("span_id")
-            ),
+            parent_event_id=self._optional_string(payload.get("parent_event_id")),
+            related_event_id=self._optional_string(payload.get("related_event_id")),
+            trace_id=self._optional_string(payload.get("trace_id")),
+            span_id=self._optional_string(payload.get("span_id")),
         )
 
     def normalize_many(
@@ -199,9 +174,7 @@ class EventNormalizer:
         normalized = self._optional_string(value)
 
         if not normalized:
-            raise EventNormalizationError(
-                "event_type is required."
-            )
+            raise EventNormalizationError("event_type is required.")
 
         key = normalized.strip().lower()
 
@@ -287,9 +260,7 @@ class EventNormalizer:
             try:
                 timestamp = datetime.fromisoformat(raw)
             except ValueError as exc:
-                raise EventNormalizationError(
-                    f"Invalid timestamp: '{value}'."
-                ) from exc
+                raise EventNormalizationError(f"Invalid timestamp: '{value}'.") from exc
         else:
             raise EventNormalizationError(
                 "timestamp must be an ISO-8601 string or datetime."
@@ -305,14 +276,10 @@ class EventNormalizer:
         payload: Mapping[str, Any],
         key: str,
     ) -> str:
-        value = EventNormalizer._optional_string(
-            payload.get(key)
-        )
+        value = EventNormalizer._optional_string(payload.get(key))
 
         if not value:
-            raise EventNormalizationError(
-                f"{key} is required."
-            )
+            raise EventNormalizationError(f"{key} is required.")
 
         return value
 

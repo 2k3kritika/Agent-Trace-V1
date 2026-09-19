@@ -2,9 +2,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
-
 from app.core.exceptions import DuplicateResourceError, NotFoundError
-
 from app.schemas.agents import (
     AgentCreateRequest,
     AgentListResponse,
@@ -13,7 +11,6 @@ from app.schemas.agents import (
 )
 from app.services.agent_service import AgentService
 from app.services.dependency import get_agent_service
-
 
 router = APIRouter(
     prefix="/agents",
@@ -35,9 +32,7 @@ def _to_response(agent) -> AgentResponse:
 )
 async def create_agent(
     request: AgentCreateRequest,
-    service: AgentService = Depends(
-        get_agent_service
-    ),
+    service: AgentService = Depends(get_agent_service),
 ) -> AgentResponse:
     try:
         agent = await service.register_agent(
@@ -45,9 +40,7 @@ async def create_agent(
             name=request.name,
             provider=request.provider,
             description=request.description,
-            provider_display_name=(
-                request.provider_display_name
-            ),
+            provider_display_name=(request.provider_display_name),
             integration_type=request.integration_type,
             capabilities=request.capabilities,
         )
@@ -82,9 +75,7 @@ async def list_agents(
     provider: str | None = None,
     risk_level: str | None = None,
     search: str | None = None,
-    service: AgentService = Depends(
-        get_agent_service
-    ),
+    service: AgentService = Depends(get_agent_service),
 ) -> AgentListResponse:
     result = await service.list_agents(
         page=page,
@@ -96,16 +87,11 @@ async def list_agents(
     )
 
     return AgentListResponse(
-        items=[
-            _to_response(agent)
-            for agent in result.items
-        ],
+        items=[_to_response(agent) for agent in result.items],
         page=page,
         page_size=page_size,
         total=result.total,
-        has_next=(
-            page * page_size < result.total
-        ),
+        has_next=(page * page_size < result.total),
     )
 
 
@@ -115,14 +101,10 @@ async def list_agents(
 )
 async def get_agent(
     agent_id: str,
-    service: AgentService = Depends(
-        get_agent_service
-    ),
+    service: AgentService = Depends(get_agent_service),
 ) -> AgentResponse:
     try:
-        agent = await service.get_agent(
-            agent_id
-        )
+        agent = await service.get_agent(agent_id)
 
         return _to_response(agent)
 
@@ -140,9 +122,7 @@ async def get_agent(
 async def update_agent_risk(
     agent_id: str,
     request: AgentUpdateRiskRequest,
-    service: AgentService = Depends(
-        get_agent_service
-    ),
+    service: AgentService = Depends(get_agent_service),
 ) -> AgentResponse:
     try:
         agent = await service.update_risk(

@@ -3,18 +3,15 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
 
-from sqlalchemy import select
-
+from app.core.exceptions import DuplicateResourceError, NotFoundError
 from app.domain.events.types import EventType
 from app.infrastructure.postgres.models import Event
-from app.core.exceptions import DuplicateResourceError
 from app.repositories.interfaces import (
     EventRepository,
 )
-from app.core.exceptions import NotFoundError
 from app.repositories.postgres.base import PostgresRepository
+from sqlalchemy import select
 
 
 class PostgresEventRepository(
@@ -34,9 +31,7 @@ class PostgresEventRepository(
         event = result.scalar_one_or_none()
 
         if event is None:
-            raise NotFoundError(
-                f"Event with event_id '{event_id}' was not found."
-            )
+            raise NotFoundError(f"Event with event_id '{event_id}' was not found.")
 
         return event
 
@@ -86,13 +81,9 @@ class PostgresEventRepository(
 
         if event_type:
             normalized_event_type = (
-                event_type.value
-                if isinstance(event_type, EventType)
-                else event_type
+                event_type.value if isinstance(event_type, EventType) else event_type
             )
-            statement = statement.where(
-                Event.event_type == normalized_event_type
-            )
+            statement = statement.where(Event.event_type == normalized_event_type)
 
         if severity:
             statement = statement.where(Event.severity == severity)

@@ -42,10 +42,7 @@ class ReportService:
         self,
         request: ReportCreateRequest,
     ) -> ReportResponse:
-        title = (
-            request.title
-            or f"{request.report_type.title()} Investigation Report"
-        )
+        title = request.title or f"{request.report_type.title()} Investigation Report"
 
         report = Report(
             investigation_id=request.investigation_id,
@@ -70,7 +67,7 @@ class ReportService:
         if report is None:
             raise ReportNotFoundError(
                 message=f"Report '{report_id}' was not found.",
-    )
+            )
 
         return self._to_response(report)
 
@@ -85,21 +82,16 @@ class ReportService:
             investigation_id=investigation_id,
         )
 
-        items = [
-            self._to_response(report)
-            for report in result.items
-        ]
+        items = [self._to_response(report) for report in result.items]
 
         return ReportListResponse(
             items=items,
             page=pagination.page,
             page_size=pagination.page_size,
             total=result.total,
-            has_next=(
-                pagination.page * pagination.page_size
-                < result.total
-            ),
+            has_next=(pagination.page * pagination.page_size < result.total),
         )
+
 
 async def update_report(
     self,

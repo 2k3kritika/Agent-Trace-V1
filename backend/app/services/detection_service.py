@@ -47,10 +47,7 @@ class DetectionService:
         self,
         events: list[CanonicalEvent],
     ) -> DetectionBatchResult:
-        results = [
-            self.detect_event(event)
-            for event in events
-        ]
+        results = [self.detect_event(event) for event in events]
 
         return DetectionBatchResult(results=results)
 

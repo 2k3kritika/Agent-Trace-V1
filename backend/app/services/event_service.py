@@ -79,9 +79,7 @@ class EventService:
         if allow_duplicate:
             created = await self.repository.create(persistence_model)
         else:
-            created = await self.repository.create_unique(
-                persistence_model
-            )
+            created = await self.repository.create_unique(persistence_model)
 
         return self._to_response(created)
 
@@ -137,34 +135,23 @@ class EventService:
             search=search,
         )
 
-        items = [
-            self._to_response(event)
-            for event in result.items
-        ]
+        items = [self._to_response(event) for event in result.items]
 
         return EventListResponse(
             items=items,
             page=pagination.page,
             page_size=pagination.page_size,
             total=result.total,
-            has_next=(
-                pagination.page * pagination.page_size
-                < result.total
-            ),
+            has_next=(pagination.page * pagination.page_size < result.total),
         )
 
     async def list_session_events(
         self,
         session_id: str,
     ) -> list[CanonicalEventResponse]:
-        result = await self.repository.list_session_events(
-            session_id
-        )
+        result = await self.repository.list_session_events(session_id)
 
-        return [
-            self._to_response(event)
-            for event in result
-        ]
+        return [self._to_response(event) for event in result]
 
     async def list_security_events(
         self,
@@ -175,18 +162,12 @@ class EventService:
             page_size=pagination.page_size,
         )
 
-        items = [
-            self._to_response(event)
-            for event in result.items
-        ]
+        items = [self._to_response(event) for event in result.items]
 
         return EventListResponse(
             items=items,
             page=pagination.page,
             page_size=pagination.page_size,
             total=result.total,
-            has_next=(
-                pagination.page * pagination.page_size
-                < result.total
-            ),
+            has_next=(pagination.page * pagination.page_size < result.total),
         )

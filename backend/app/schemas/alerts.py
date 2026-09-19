@@ -2,10 +2,9 @@ from __future__ import annotations
 
 from typing import Any
 
-from pydantic import Field
-
 from app.domain.events.types import EventSeverity
 from app.schemas.common import APIModel
+from pydantic import Field
 
 
 class AlertCreateRequest(APIModel):
@@ -20,9 +19,7 @@ class AlertCreateRequest(APIModel):
 
     detector_id: str | None = None
 
-    metadata: dict[str, Any] = Field(
-        default_factory=dict
-    )
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class AlertResponse(APIModel):
@@ -41,15 +38,11 @@ class AlertResponse(APIModel):
     created_at: str
     updated_at: str
 
-    metadata: dict[str, Any] = Field(
-        default_factory=dict
-    )
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class AlertListResponse(APIModel):
-    items: list[AlertResponse] = Field(
-        default_factory=list
-    )
+    items: list[AlertResponse] = Field(default_factory=list)
     page: int
     page_size: int
     total: int

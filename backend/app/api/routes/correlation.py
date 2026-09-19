@@ -13,7 +13,6 @@ from app.services.dependency import (
 )
 from app.services.event_service import EventService
 
-
 router = APIRouter(
     prefix="/correlation",
     tags=["Correlation"],
@@ -36,14 +35,10 @@ async def correlate_session(
     event_service: EventService = get_event_service(db)
     correlation_service = get_correlation_service()
 
-    event_responses = await event_service.list_session_events(
-        session_id
-    )
+    event_responses = await event_service.list_session_events(session_id)
 
     events = [
-        CanonicalEvent.model_validate(
-            event.model_dump(mode="python")
-        )
+        CanonicalEvent.model_validate(event.model_dump(mode="python"))
         for event in event_responses
     ]
 

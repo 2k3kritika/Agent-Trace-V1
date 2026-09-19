@@ -21,8 +21,10 @@ class AgentTraceError(Exception):
 
         super().__init__(self.message)
 
+
 class RepositoryError(AgentTraceError):
     """Raised when a repository operation fails."""
+
 
 class ValidationError(AgentTraceError):
     """Raised when domain-level validation fails."""
@@ -46,6 +48,7 @@ class AuthorizationError(AgentTraceError):
     code = "AUTHORIZATION_ERROR"
     status_code = 403
     default_message = "You are not authorized to perform this action."
+
 
 class NotFoundError(AgentTraceError):
     """Raised when a requested resource does not exist."""
@@ -193,6 +196,7 @@ def error_payload(
         payload["request_id"] = request_id
 
     return payload
+
 
 class AppError(Exception):
     """Base application exception."""

@@ -5,15 +5,13 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import select
-
+from app.core.exceptions import DuplicateResourceError, NotFoundError
 from app.infrastructure.postgres.models import Session
-from app.core.exceptions import DuplicateResourceError
 from app.repositories.interfaces import (
     SessionRepository,
 )
-from app.core.exceptions import NotFoundError
 from app.repositories.postgres.base import PostgresRepository
+from sqlalchemy import select
 
 
 class PostgresSessionRepository(

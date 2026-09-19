@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from pydantic import EmailStr, Field
-
 from app.schemas.common import APIModel
+from pydantic import EmailStr, Field
 
 
 class LoginRequest(APIModel):

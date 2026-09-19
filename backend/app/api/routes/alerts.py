@@ -11,7 +11,6 @@ from app.schemas.alerts import (
 from app.services.alert_service import AlertService
 from app.services.dependency import get_alert_service
 
-
 router = APIRouter(
     prefix="/alerts",
     tags=["Alerts"],
@@ -75,10 +74,7 @@ async def list_alerts(
         status=status,
     )
 
-    items = [
-        _alert_to_response(alert)
-        for alert in result.items
-    ]
+    items = [_alert_to_response(alert) for alert in result.items]
 
     return AlertListResponse(
         items=items,

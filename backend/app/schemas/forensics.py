@@ -1,9 +1,8 @@
 from datetime import datetime
 from typing import Any
 
-from pydantic import Field
-
 from app.schemas.common import APIModel
+from pydantic import Field
 
 
 class ForensicAnalysisRequest(APIModel):
@@ -63,13 +62,9 @@ class ForensicAnalysisResponse(APIModel):
     sensitive_action_count: int
     blocked_action_count: int
 
-    findings: list[ForensicFindingResponse] = Field(
-        default_factory=list
-    )
+    findings: list[ForensicFindingResponse] = Field(default_factory=list)
 
-    timeline: list[ForensicTimelineItem] = Field(
-        default_factory=list
-    )
+    timeline: list[ForensicTimelineItem] = Field(default_factory=list)
 
     graph: AttackGraphResponse | None = None
 

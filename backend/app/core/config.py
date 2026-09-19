@@ -7,14 +7,13 @@ logic.
 
 from functools import lru_cache
 
-from pydantic import Field, field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
-
 from app.core.constants import (
     APP_NAME,
     Environment,
     StorageBackend,
 )
+from pydantic import Field, field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -148,11 +147,7 @@ class Settings(BaseSettings):
 
                 return [str(origin).strip() for origin in parsed if str(origin).strip()]
 
-            return [
-                origin.strip()
-                for origin in value.split(",")
-                if origin.strip()
-            ]
+            return [origin.strip() for origin in value.split(",") if origin.strip()]
 
         if isinstance(value, (list, tuple, set)):
             return [str(origin).strip() for origin in value if str(origin).strip()]
@@ -192,9 +187,7 @@ class Settings(BaseSettings):
         if self.auth_enabled and self.jwt_secret_key == (
             "development-only-change-this-secret"
         ):
-            raise ValueError(
-                "JWT_SECRET_KEY must be changed when AUTH_ENABLED=true."
-            )
+            raise ValueError("JWT_SECRET_KEY must be changed when AUTH_ENABLED=true.")
 
         if "*" in self.cors_allowed_origins:
             raise ValueError(

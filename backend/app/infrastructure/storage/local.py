@@ -60,32 +60,22 @@ class LocalArtifactStorage:
     ) -> StoredArtifact:
         artifact_id = str(uuid4())
 
-        safe_filename = self._safe_filename(
-            filename
-        )
+        safe_filename = self._safe_filename(filename)
 
-        artifact_directory = (
-            self.base_path / artifact_id
-        )
+        artifact_directory = self.base_path / artifact_id
 
         artifact_directory.mkdir(
             parents=True,
             exist_ok=True,
         )
 
-        file_path = (
-            artifact_directory / safe_filename
-        )
+        file_path = artifact_directory / safe_filename
 
         file_path.write_bytes(content)
 
-        sha256 = hashlib.sha256(
-            content
-        ).hexdigest()
+        sha256 = hashlib.sha256(content).hexdigest()
 
-        created_at = datetime.now(
-            timezone.utc
-        )
+        created_at = datetime.now(timezone.utc)
 
         return StoredArtifact(
             artifact_id=artifact_id,
@@ -104,9 +94,7 @@ class LocalArtifactStorage:
         file_path = Path(storage_uri)
 
         if not file_path.exists():
-            raise FileNotFoundError(
-                f"Artifact does not exist: {storage_uri}"
-            )
+            raise FileNotFoundError(f"Artifact does not exist: {storage_uri}")
 
         return file_path.read_bytes()
 
@@ -121,9 +109,5 @@ class LocalArtifactStorage:
 
         parent = file_path.parent
 
-        if (
-            parent.exists()
-            and parent.is_dir()
-            and not any(parent.iterdir())
-        ):
+        if parent.exists() and parent.is_dir() and not any(parent.iterdir()):
             parent.rmdir()

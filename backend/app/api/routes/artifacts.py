@@ -22,13 +22,9 @@ router = APIRouter(
 )
 async def create_artifact(
     request: ArtifactCreateRequest,
-    service: ArtifactService = Depends(
-        get_artifact_service
-    ),
+    service: ArtifactService = Depends(get_artifact_service),
 ) -> ArtifactResponse:
-    return await service.create_artifact(
-        request
-    )
+    return await service.create_artifact(request)
 
 
 @router.get(
@@ -36,13 +32,9 @@ async def create_artifact(
 )
 async def read_artifact(
     storage_uri: str,
-    service: ArtifactService = Depends(
-        get_artifact_service
-    ),
+    service: ArtifactService = Depends(get_artifact_service),
 ) -> Response:
-    content = await service.read_artifact(
-        storage_uri
-    )
+    content = await service.read_artifact(storage_uri)
 
     return Response(
         content=content,
@@ -55,14 +47,8 @@ async def read_artifact(
 )
 async def delete_artifact(
     storage_uri: str,
-    service: ArtifactService = Depends(
-        get_artifact_service
-    ),
+    service: ArtifactService = Depends(get_artifact_service),
 ) -> dict[str, str]:
-    await service.delete_artifact(
-        storage_uri
-    )
+    await service.delete_artifact(storage_uri)
 
-    return {
-        "message": "Artifact deleted successfully."
-    }
+    return {"message": "Artifact deleted successfully."}

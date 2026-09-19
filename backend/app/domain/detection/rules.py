@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, ClassVar
 
 from app.domain.detection.models import DetectionFinding
 from app.domain.events.models import CanonicalEvent
@@ -65,7 +65,7 @@ class UntrustedContentRule(DetectionRule):
     title = "Untrusted Content Detected"
     severity = EventSeverity.MEDIUM
 
-    _untrusted_levels = {
+    _untrusted_levels: ClassVar[set[str]] = {
         "untrusted",
         "external",
         "unknown",
@@ -77,9 +77,7 @@ class UntrustedContentRule(DetectionRule):
         data = _combined_data(event)
 
         trust_level = _normalized_text(
-            data.get("trust_level")
-            or data.get("trust")
-            or data.get("content_trust")
+            data.get("trust_level") or data.get("trust") or data.get("content_trust")
         )
 
         explicitly_untrusted = any(
@@ -97,9 +95,7 @@ class UntrustedContentRule(DetectionRule):
         detected_by_trust_level = trust_level in self._untrusted_levels
 
         if not (
-            detected_by_event_type
-            or explicitly_untrusted
-            or detected_by_trust_level
+            detected_by_event_type or explicitly_untrusted or detected_by_trust_level
         ):
             return None
 
@@ -167,9 +163,7 @@ class PromptInjectionRule(DetectionRule):
             )
 
             searchable_text = " ".join(
-                _normalized_text(value)
-                for value in text_fields
-                if value is not None
+                _normalized_text(value) for value in text_fields if value is not None
             )
 
             matched_indicator = next(
@@ -213,7 +207,7 @@ class SensitiveActionRule(DetectionRule):
     title = "Sensitive Action Attempted"
     severity = EventSeverity.HIGH
 
-    _sensitive_tools = {
+    _sensitive_tools: ClassVar[set[str]] = {
         "send_email",
         "send_mail",
         "email",
@@ -234,7 +228,7 @@ class SensitiveActionRule(DetectionRule):
         "publish",
     }
 
-    _attempt_statuses = {
+    _attempt_statuses: ClassVar[set[EventStatus]] = {
         EventStatus.REQUESTED,
         EventStatus.STARTED,
         EventStatus.ATTEMPTED,
@@ -254,9 +248,7 @@ class SensitiveActionRule(DetectionRule):
             )
         )
 
-        event_is_sensitive = (
-            event.event_type == EventType.SENSITIVE_ACTION_ATTEMPTED
-        )
+        event_is_sensitive = event.event_type == EventType.SENSITIVE_ACTION_ATTEMPTED
 
         tool_name = _normalized_text(
             event.tool
@@ -286,11 +278,14 @@ class SensitiveActionRule(DetectionRule):
             or data.get("sensitive_action_executed")
         )
 
-        blocked = _is_true(
-            data.get("blocked")
-            or data.get("action_blocked")
-            or data.get("tool_blocked")
-        ) or event.status == EventStatus.BLOCKED
+        blocked = (
+            _is_true(
+                data.get("blocked")
+                or data.get("action_blocked")
+                or data.get("tool_blocked")
+            )
+            or event.status == EventStatus.BLOCKED
+        )
 
         return DetectionFinding(
             detector_id=self.detector_id,

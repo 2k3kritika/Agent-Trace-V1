@@ -1,8 +1,7 @@
-from sqlalchemy import select
-
 from app.infrastructure.postgres.models import Evidence
-from app.repositories.postgres.base import PostgresRepository
 from app.repositories.interfaces import RepositoryListResult
+from app.repositories.postgres.base import PostgresRepository
+from sqlalchemy import select
 
 
 class PostgresEvidenceRepository(PostgresRepository[Evidence]):
@@ -32,14 +31,10 @@ class PostgresEvidenceRepository(PostgresRepository[Evidence]):
         query = select(Evidence)
 
         if investigation_id:
-            query = query.where(
-                Evidence.investigation_id == investigation_id
-            )
+            query = query.where(Evidence.investigation_id == investigation_id)
 
         if evidence_type:
-            query = query.where(
-                Evidence.evidence_type == evidence_type
-            )
+            query = query.where(Evidence.evidence_type == evidence_type)
 
         return await super().list_page(
             page=page,

@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
-
-from sqlalchemy import func, select
-
+from app.core.constants import RiskLevel
+from app.domain.events.types import EventSeverity
 from app.infrastructure.postgres.models import (
     Agent,
     Alert,
@@ -11,8 +9,7 @@ from app.infrastructure.postgres.models import (
     Investigation,
     Session,
 )
-from app.core.constants import RiskLevel
-from app.domain.events.types import EventSeverity
+from sqlalchemy import func, select
 
 
 class PostgresDashboardRepository:
@@ -20,26 +17,18 @@ class PostgresDashboardRepository:
         self.session = session
 
     async def count_agents(self) -> dict[str, int]:
-        total_result = await self.session.execute(
-            select(func.count(Agent.id))
-        )
+        total_result = await self.session.execute(select(func.count(Agent.id)))
 
         active_result = await self.session.execute(
-            select(func.count(Agent.id)).where(
-                Agent.status == "ACTIVE"
-            )
+            select(func.count(Agent.id)).where(Agent.status == "ACTIVE")
         )
 
         inactive_result = await self.session.execute(
-            select(func.count(Agent.id)).where(
-                Agent.status != "ACTIVE"
-            )
+            select(func.count(Agent.id)).where(Agent.status != "ACTIVE")
         )
 
         high_result = await self.session.execute(
-            select(func.count(Agent.id)).where(
-                Agent.risk_level == RiskLevel.HIGH.value
-            )
+            select(func.count(Agent.id)).where(Agent.risk_level == RiskLevel.HIGH.value)
         )
 
         critical_result = await self.session.execute(
@@ -57,20 +46,14 @@ class PostgresDashboardRepository:
         }
 
     async def count_sessions(self) -> dict[str, int]:
-        total_result = await self.session.execute(
-            select(func.count(Session.id))
-        )
+        total_result = await self.session.execute(select(func.count(Session.id)))
 
         active_result = await self.session.execute(
-            select(func.count(Session.id)).where(
-                Session.status == "ACTIVE"
-            )
+            select(func.count(Session.id)).where(Session.status == "ACTIVE")
         )
 
         completed_result = await self.session.execute(
-            select(func.count(Session.id)).where(
-                Session.status == "COMPLETED"
-            )
+            select(func.count(Session.id)).where(Session.status == "COMPLETED")
         )
 
         return {
@@ -80,20 +63,14 @@ class PostgresDashboardRepository:
         }
 
     async def count_investigations(self) -> dict[str, int]:
-        total_result = await self.session.execute(
-            select(func.count(Investigation.id))
-        )
+        total_result = await self.session.execute(select(func.count(Investigation.id)))
 
         open_result = await self.session.execute(
-            select(func.count(Investigation.id)).where(
-                Investigation.status == "OPEN"
-            )
+            select(func.count(Investigation.id)).where(Investigation.status == "OPEN")
         )
 
         closed_result = await self.session.execute(
-            select(func.count(Investigation.id)).where(
-                Investigation.status == "CLOSED"
-            )
+            select(func.count(Investigation.id)).where(Investigation.status == "CLOSED")
         )
 
         high_result = await self.session.execute(
@@ -117,26 +94,18 @@ class PostgresDashboardRepository:
         }
 
     async def count_alerts(self) -> dict[str, int]:
-        total_result = await self.session.execute(
-            select(func.count(Alert.id))
-        )
+        total_result = await self.session.execute(select(func.count(Alert.id)))
 
         open_result = await self.session.execute(
-            select(func.count(Alert.id)).where(
-                Alert.status == "OPEN"
-            )
+            select(func.count(Alert.id)).where(Alert.status == "OPEN")
         )
 
         acknowledged_result = await self.session.execute(
-            select(func.count(Alert.id)).where(
-                Alert.status == "ACKNOWLEDGED"
-            )
+            select(func.count(Alert.id)).where(Alert.status == "ACKNOWLEDGED")
         )
 
         resolved_result = await self.session.execute(
-            select(func.count(Alert.id)).where(
-                Alert.status == "RESOLVED"
-            )
+            select(func.count(Alert.id)).where(Alert.status == "RESOLVED")
         )
 
         critical_result = await self.session.execute(
@@ -165,9 +134,7 @@ class PostgresDashboardRepository:
             select(
                 Investigation.risk_level,
                 func.count(Investigation.id),
-            ).group_by(
-                Investigation.risk_level
-            )
+            ).group_by(Investigation.risk_level)
         )
 
         distribution = {
@@ -201,9 +168,7 @@ class PostgresDashboardRepository:
                     ]
                 )
             )
-            .order_by(
-                Event.timestamp.desc()
-            )
+            .order_by(Event.timestamp.desc())
             .limit(limit)
         )
 

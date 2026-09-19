@@ -11,7 +11,6 @@ from app.schemas.investigations import (
 from app.services.dependency import get_investigation_service
 from app.services.investigation_service import InvestigationService
 
-
 router = APIRouter(
     prefix="/investigations",
     tags=["Investigations"],
@@ -32,17 +31,11 @@ def _investigation_to_response(
         verdict_type=investigation.verdict_type,
         attack_vector=investigation.attack_vector,
         impact=investigation.impact,
-        sensitive_action_attempted=(
-            investigation.sensitive_action_attempted
-        ),
-        sensitive_action_executed=(
-            investigation.sensitive_action_executed
-        ),
+        sensitive_action_attempted=(investigation.sensitive_action_attempted),
+        sensitive_action_executed=(investigation.sensitive_action_executed),
         policy_violation=investigation.policy_violation,
         action_blocked=investigation.action_blocked,
-        external_transmission=(
-            investigation.external_transmission
-        ),
+        external_transmission=(investigation.external_transmission),
         summary=investigation.summary or {},
         graph=investigation.graph or {},
         created_at=investigation.created_at.isoformat(),
@@ -56,9 +49,7 @@ def _investigation_to_response(
 )
 async def create_investigation(
     request: InvestigationCreateRequest,
-    service: InvestigationService = Depends(
-        get_investigation_service
-    ),
+    service: InvestigationService = Depends(get_investigation_service),
 ) -> InvestigationResponse:
     investigation = await service.create_investigation(
         session_id=request.session_id,
@@ -70,17 +61,11 @@ async def create_investigation(
         verdict_type=request.verdict_type,
         attack_vector=request.attack_vector,
         impact=request.impact,
-        sensitive_action_attempted=(
-            request.sensitive_action_attempted
-        ),
-        sensitive_action_executed=(
-            request.sensitive_action_executed
-        ),
+        sensitive_action_attempted=(request.sensitive_action_attempted),
+        sensitive_action_executed=(request.sensitive_action_executed),
         policy_violation=request.policy_violation,
         action_blocked=request.action_blocked,
-        external_transmission=(
-            request.external_transmission
-        ),
+        external_transmission=(request.external_transmission),
         summary=request.summary,
         graph=request.graph,
     )
@@ -99,9 +84,7 @@ async def list_investigations(
     session_id: str | None = None,
     status: str | None = None,
     risk_level: str | None = None,
-    service: InvestigationService = Depends(
-        get_investigation_service
-    ),
+    service: InvestigationService = Depends(get_investigation_service),
 ) -> InvestigationListResponse:
     result = await service.list_investigations(
         page=page,
@@ -113,10 +96,7 @@ async def list_investigations(
     )
 
     return InvestigationListResponse(
-        items=[
-            _investigation_to_response(item)
-            for item in result.items
-        ],
+        items=[_investigation_to_response(item) for item in result.items],
         page=page,
         page_size=page_size,
         total=result.total,
@@ -130,13 +110,9 @@ async def list_investigations(
 )
 async def get_investigation(
     investigation_id: str,
-    service: InvestigationService = Depends(
-        get_investigation_service
-    ),
+    service: InvestigationService = Depends(get_investigation_service),
 ) -> InvestigationResponse:
-    investigation = await service.get_investigation(
-        investigation_id
-    )
+    investigation = await service.get_investigation(investigation_id)
 
     return _investigation_to_response(investigation)
 
@@ -148,9 +124,7 @@ async def get_investigation(
 async def update_investigation(
     investigation_id: str,
     request: InvestigationUpdateRequest,
-    service: InvestigationService = Depends(
-        get_investigation_service
-    ),
+    service: InvestigationService = Depends(get_investigation_service),
 ) -> InvestigationResponse:
     updates = request.model_dump(
         exclude_unset=True,
@@ -170,12 +144,8 @@ async def update_investigation(
 )
 async def close_investigation(
     investigation_id: str,
-    service: InvestigationService = Depends(
-        get_investigation_service
-    ),
+    service: InvestigationService = Depends(get_investigation_service),
 ) -> InvestigationResponse:
-    investigation = await service.close_investigation(
-        investigation_id
-    )
+    investigation = await service.close_investigation(investigation_id)
 
     return _investigation_to_response(investigation)

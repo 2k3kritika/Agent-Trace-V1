@@ -11,7 +11,6 @@ from app.schemas.sessions import (
 from app.services.dependency import get_session_service
 from app.services.session_service import SessionService
 
-
 router = APIRouter(
     prefix="/sessions",
     tags=["Sessions"],
@@ -32,9 +31,7 @@ def _to_response(session) -> SessionResponse:
 )
 async def create_session(
     request: SessionCreateRequest,
-    service: SessionService = Depends(
-        get_session_service
-    ),
+    service: SessionService = Depends(get_session_service),
 ) -> SessionResponse:
     session, _ = await service.create_session(
         session_id=request.session_id,
@@ -68,9 +65,7 @@ async def list_sessions(
     ),
     risk_level: str | None = None,
     search: str | None = None,
-    service: SessionService = Depends(
-        get_session_service
-    ),
+    service: SessionService = Depends(get_session_service),
 ) -> SessionListResponse:
     result = await service.list_sessions(
         page=page,
@@ -82,16 +77,11 @@ async def list_sessions(
     )
 
     return SessionListResponse(
-        items=[
-            _to_response(session)
-            for session in result.items
-        ],
+        items=[_to_response(session) for session in result.items],
         page=page,
         page_size=page_size,
         total=result.total,
-        has_next=(
-            page * page_size < result.total
-        ),
+        has_next=(page * page_size < result.total),
     )
 
 
@@ -101,14 +91,10 @@ async def list_sessions(
 )
 async def get_session(
     session_id: str,
-    service: SessionService = Depends(
-        get_session_service
-    ),
+    service: SessionService = Depends(get_session_service),
 ) -> SessionResponse:
     try:
-        session = await service.get_session(
-            session_id
-        )
+        session = await service.get_session(session_id)
 
         return _to_response(session)
 
@@ -125,14 +111,10 @@ async def get_session(
 )
 async def close_session(
     session_id: str,
-    service: SessionService = Depends(
-        get_session_service
-    ),
+    service: SessionService = Depends(get_session_service),
 ) -> SessionResponse:
     try:
-        session = await service.close_session(
-            session_id
-        )
+        session = await service.close_session(session_id)
 
         return _to_response(session)
 

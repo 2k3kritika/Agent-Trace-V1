@@ -2,14 +2,12 @@
 
 from __future__ import annotations
 
-from sqlalchemy import select
-
 from app.infrastructure.postgres.models import Policy
 from app.repositories.interfaces import (
     PolicyRepository,
 )
-from app.core.exceptions import NotFoundError
 from app.repositories.postgres.base import PostgresRepository
+from sqlalchemy import select
 
 
 class PostgresPolicyRepository(
@@ -39,15 +37,12 @@ class PostgresPolicyRepository(
         statement = select(Policy)
 
         if status:
-            statement = statement.where(
-                Policy.status == status
-            )
+            statement = statement.where(Policy.status == status)
 
         if search:
             pattern = f"%{search.strip()}%"
             statement = statement.where(
-                Policy.name.ilike(pattern)
-                | Policy.description.ilike(pattern)
+                Policy.name.ilike(pattern) | Policy.description.ilike(pattern)
             )
 
         statement = statement.order_by(

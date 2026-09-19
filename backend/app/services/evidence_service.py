@@ -62,9 +62,7 @@ class EvidenceService:
         self,
         investigation_id: str,
     ) -> list[EvidenceResponse]:
-        items = await self.repository.get_by_investigation(
-            investigation_id
-        )
+        items = await self.repository.get_by_investigation(investigation_id)
 
         return [self._to_response(item) for item in items]
 

@@ -12,7 +12,6 @@ from typing import Generic, TypeVar
 
 from pydantic import BaseModel, ConfigDict, Field
 
-
 T = TypeVar("T")
 
 
@@ -107,5 +106,3 @@ class AuditMetadata(FlexibleAPIModel):
     Provider-specific information is intentionally allowed here because
     audit metadata may differ between local and AWS deployments.
     """
-
-    pass 

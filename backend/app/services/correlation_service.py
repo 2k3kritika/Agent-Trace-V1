@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from itertools import pairwise
+
 from app.domain.correlation.models import (
     CorrelationCandidate,
     CorrelationResult,
@@ -32,21 +34,15 @@ class CorrelationService:
         relationships: list[CorrelationCandidate] = []
 
         if request.include_chronological:
-            for previous, current in zip(
-                ordered_events,
-                ordered_events[1:],
-            ):
+            for previous, current in pairwise(ordered_events):
                 relationships.append(
                     CorrelationCandidate(
                         source_event_id=previous.event_id,
                         target_event_id=current.event_id,
-                        relationship_type=(
-                            EventRelationshipType.FOLLOWS
-                        ),
+                        relationship_type=(EventRelationshipType.FOLLOWS),
                         confidence=1.0,
                         reason=(
-                            "Events occurred consecutively "
-                            "within the same session."
+                            "Events occurred consecutively within the same session."
                         ),
                     )
                 )
@@ -58,19 +54,15 @@ class CorrelationService:
                         continue
 
                     if (
-                        source.event_type
-                        == EventType.PROMPT_INJECTION_DETECTED
-                        and target.event_type
-                        == EventType.SENSITIVE_ACTION_ATTEMPTED
+                        source.event_type == EventType.PROMPT_INJECTION_DETECTED
+                        and target.event_type == EventType.SENSITIVE_ACTION_ATTEMPTED
                         and source.timestamp <= target.timestamp
                     ):
                         relationships.append(
                             CorrelationCandidate(
                                 source_event_id=source.event_id,
                                 target_event_id=target.event_id,
-                                relationship_type=(
-                                    EventRelationshipType.CAUSED_BY
-                                ),
+                                relationship_type=(EventRelationshipType.CAUSED_BY),
                                 confidence=0.9,
                                 reason=(
                                     "A sensitive action occurred "
@@ -80,23 +72,18 @@ class CorrelationService:
                         )
 
                     if (
-                        source.event_type
-                        == EventType.POLICY_VIOLATION
-                        and target.event_type
-                        == EventType.TOOL_BLOCKED
+                        source.event_type == EventType.POLICY_VIOLATION
+                        and target.event_type == EventType.TOOL_BLOCKED
                         and source.timestamp <= target.timestamp
                     ):
                         relationships.append(
                             CorrelationCandidate(
                                 source_event_id=source.event_id,
                                 target_event_id=target.event_id,
-                                relationship_type=(
-                                    EventRelationshipType.CAUSED_BY
-                                ),
+                                relationship_type=(EventRelationshipType.CAUSED_BY),
                                 confidence=0.95,
                                 reason=(
-                                    "The tool was blocked after "
-                                    "a policy violation."
+                                    "The tool was blocked after a policy violation."
                                 ),
                             )
                         )

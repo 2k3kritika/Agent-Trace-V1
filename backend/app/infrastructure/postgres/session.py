@@ -8,13 +8,11 @@ SQLAlchemy session infrastructure directly.
 
 from __future__ import annotations
 
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncGenerator, AsyncIterator
 from contextlib import asynccontextmanager
-from typing import AsyncIterator
-
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.infrastructure.postgres.database import AsyncSessionFactory
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 @asynccontextmanager

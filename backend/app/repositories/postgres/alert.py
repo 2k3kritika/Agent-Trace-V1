@@ -4,14 +4,11 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from sqlalchemy import select
-
-from app.infrastructure.postgres.models import Alert
-from app.repositories.interfaces import (
-    AlertRepository
-)
 from app.core.exceptions import NotFoundError
+from app.infrastructure.postgres.models import Alert
+from app.repositories.interfaces import AlertRepository
 from app.repositories.postgres.base import PostgresRepository
+from sqlalchemy import select
 
 
 class PostgresAlertRepository(
@@ -34,9 +31,7 @@ class PostgresAlertRepository(
         alert = result.scalar_one_or_none()
 
         if alert is None:
-            raise NotFoundError(
-                f"Alert '{alert_id}' was not found."
-            )
+            raise NotFoundError(f"Alert '{alert_id}' was not found.")
 
         return alert
 
@@ -58,39 +53,25 @@ class PostgresAlertRepository(
         statement = select(Alert)
 
         if agent_id:
-            statement = statement.where(
-                Alert.agent_id == agent_id
-            )
+            statement = statement.where(Alert.agent_id == agent_id)
 
         if session_id:
-            statement = statement.where(
-                Alert.session_id == session_id
-            )
+            statement = statement.where(Alert.session_id == session_id)
 
         if investigation_id:
-            statement = statement.where(
-                Alert.investigation_id == investigation_id
-            )
+            statement = statement.where(Alert.investigation_id == investigation_id)
 
         if severity:
-            statement = statement.where(
-                Alert.severity == severity
-            )
+            statement = statement.where(Alert.severity == severity)
 
         if status:
-            statement = statement.where(
-                Alert.status == status
-            )
+            statement = statement.where(Alert.status == status)
 
         if from_timestamp:
-            statement = statement.where(
-                Alert.created_at >= from_timestamp
-            )
+            statement = statement.where(Alert.created_at >= from_timestamp)
 
         if to_timestamp:
-            statement = statement.where(
-                Alert.created_at <= to_timestamp
-            )
+            statement = statement.where(Alert.created_at <= to_timestamp)
 
         if search:
             pattern = f"%{search.strip()}%"

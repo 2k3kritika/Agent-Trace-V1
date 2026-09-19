@@ -169,17 +169,9 @@ class EventCollection:
     def for_session(self, session_id: str) -> list[CanonicalEvent]:
         """Return events belonging to a specific session."""
 
-        return [
-            event
-            for event in self.events
-            if event.session_id == session_id
-        ]
+        return [event for event in self.events if event.session_id == session_id]
 
     def for_agent(self, agent_id: str) -> list[CanonicalEvent]:
         """Return events belonging to a specific agent."""
 
-        return [
-            event
-            for event in self.events
-            if event.agent_id == agent_id
-        ]
+        return [event for event in self.events if event.agent_id == agent_id]

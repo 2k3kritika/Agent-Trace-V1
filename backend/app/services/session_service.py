@@ -31,9 +31,7 @@ class SessionService:
         session_id: str,
     ) -> Session | None:
         """Retrieve a session or return None."""
-        return await self.repository.get_optional_by_session_id(
-            session_id
-        )
+        return await self.repository.get_optional_by_session_id(session_id)
 
     async def create_session(
         self,
@@ -46,9 +44,7 @@ class SessionService:
     ) -> tuple[Session, bool]:
         """Create a session unless the session ID already exists."""
 
-        existing = await self.repository.get_optional_by_session_id(
-            session_id
-        )
+        existing = await self.repository.get_optional_by_session_id(session_id)
 
         if existing is not None:
             return existing, False

@@ -3,9 +3,8 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from pydantic import Field
-
 from app.schemas.common import APIModel
+from pydantic import Field
 
 
 class AgentCreateRequest(APIModel):
@@ -17,9 +16,7 @@ class AgentCreateRequest(APIModel):
     provider_display_name: str | None = None
     integration_type: str | None = None
 
-    capabilities: dict[str, Any] = Field(
-        default_factory=dict
-    )
+    capabilities: dict[str, Any] = Field(default_factory=dict)
 
 
 class AgentUpdateRiskRequest(APIModel):
@@ -49,9 +46,7 @@ class AgentResponse(APIModel):
 
     integration_type: str | None = None
 
-    capabilities: dict[str, Any] = Field(
-        default_factory=dict
-    )
+    capabilities: dict[str, Any] = Field(default_factory=dict)
 
     created_at: datetime
     updated_at: datetime

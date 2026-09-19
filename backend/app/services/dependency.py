@@ -1,10 +1,8 @@
-
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.infrastructure.postgres.database import get_db_session
 from app.infrastructure.storage.local import LocalArtifactStorage
-
 from app.repositories.postgres.agent import PostgresAgentRepository
 from app.repositories.postgres.alert import PostgresAlertRepository
 from app.repositories.postgres.dashboard import PostgresDashboardRepository
@@ -20,12 +18,11 @@ from app.repositories.postgres.policy import PostgresPolicyRepository
 from app.repositories.postgres.report import PostgresReportRepository
 from app.repositories.postgres.session import PostgresSessionRepository
 from app.repositories.postgres.user import PostgresUserRepository
-
 from app.services.agent_service import AgentService
 from app.services.alert_service import AlertService
 from app.services.artifact_service import ArtifactService
+from app.services.audit_service import AuditService
 from app.services.auth_service import AuthService
-from app.services.correlation_service import CorrelationService
 from app.services.dashboard_service import DashboardService
 from app.services.detection_service import DetectionService
 from app.services.event_service import EventService
@@ -125,17 +122,11 @@ def get_telemetry_service(
 def get_investigation_forensic_service(
     db: AsyncSession = Depends(get_db_session),
 ) -> InvestigationForensicService:
-    investigation_service = InvestigationService(
-        PostgresInvestigationRepository(db)
-    )
+    investigation_service = InvestigationService(PostgresInvestigationRepository(db))
 
-    event_service = EventService(
-        PostgresEventRepository(db)
-    )
+    event_service = EventService(PostgresEventRepository(db))
 
-    evidence_service = EvidenceService(
-        PostgresEvidenceRepository(db)
-    )
+    evidence_service = EvidenceService(PostgresEvidenceRepository(db))
 
     forensic_service = ForensicService()
 
@@ -154,9 +145,7 @@ def get_dashboard_repository(
 
 
 def get_dashboard_service(
-    repository: PostgresDashboardRepository = Depends(
-        get_dashboard_repository
-    ),
+    repository: PostgresDashboardRepository = Depends(get_dashboard_repository),
 ) -> DashboardService:
     return DashboardService(repository)
 
@@ -166,9 +155,7 @@ def get_artifact_storage() -> LocalArtifactStorage:
 
 
 def get_artifact_service(
-    storage: LocalArtifactStorage = Depends(
-        get_artifact_storage
-    ),
+    storage: LocalArtifactStorage = Depends(get_artifact_storage),
 ) -> ArtifactService:
     return ArtifactService(storage)
 
@@ -180,8 +167,18 @@ def get_user_repository(
 
 
 def get_auth_service(
-    repository: PostgresUserRepository = Depends(
-        get_user_repository
-    ),
+    repository: PostgresUserRepository = Depends(get_user_repository),
 ) -> AuthService:
     return AuthService(repository)
+
+
+def get_event_repository(
+    db: AsyncSession = Depends(get_db_session),
+) -> PostgresEventRepository:
+    return PostgresEventRepository(db)
+
+
+def get_audit_service(
+    repository: PostgresEventRepository = Depends(get_event_repository),
+) -> AuditService:
+    return AuditService(repository)

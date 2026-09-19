@@ -12,7 +12,6 @@ from app.services.dependency import (
     get_db_session,
     get_evidence_service,
 )
-from app.services.evidence_service import EvidenceService
 
 router = APIRouter(
     prefix="/evidence",
@@ -58,9 +57,7 @@ async def list_evidence(
         page=pagination.page,
         page_size=pagination.page_size,
         total=total,
-        has_next=(
-            pagination.page * pagination.page_size < total
-        ),
+        has_next=(pagination.page * pagination.page_size < total),
     )
 
 
@@ -74,9 +71,7 @@ async def list_investigation_evidence(
 ) -> list[EvidenceResponse]:
     service = get_evidence_service(db)
 
-    return await service.list_investigation_evidence(
-        investigation_id
-    )
+    return await service.list_investigation_evidence(investigation_id)
 
 
 @router.get(
@@ -121,6 +116,4 @@ async def delete_evidence(
 
     await service.delete_evidence(evidence_id)
 
-    return MessageResponse(
-        message="Evidence deleted successfully."
-    )
+    return MessageResponse(message="Evidence deleted successfully.")

@@ -22,9 +22,7 @@ class IntegrationService:
         self,
         integration_id: str,
     ) -> Integration:
-        return await self.repository.get_by_id(
-            integration_id
-        )
+        return await self.repository.get_by_id(integration_id)
 
     async def create_integration(
         self,
@@ -49,9 +47,7 @@ class IntegrationService:
             configuration=configuration or {},
         )
 
-        return await self.repository.create(
-            integration
-        )
+        return await self.repository.create(integration)
 
     async def update_integration(
         self,
@@ -62,9 +58,7 @@ class IntegrationService:
         environment: str | None = None,
         configuration: dict[str, Any] | None = None,
     ) -> Integration:
-        integration = await self.repository.get_by_id(
-            integration_id
-        )
+        integration = await self.repository.get_by_id(integration_id)
 
         if status is not None:
             integration.status = status
@@ -78,17 +72,13 @@ class IntegrationService:
         if configuration is not None:
             integration.configuration = configuration
 
-        return await self.repository.update(
-            integration
-        )
+        return await self.repository.update(integration)
 
     async def delete_integration(
         self,
         integration_id: str,
     ) -> None:
-        await self.repository.delete(
-            integration_id
-        )
+        await self.repository.delete(integration_id)
 
     async def list_integrations(
         self,

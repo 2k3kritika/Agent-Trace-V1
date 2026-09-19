@@ -10,7 +10,6 @@ from app.schemas.policy import (
 from app.services.dependency import get_policy_service
 from app.services.policy_service import PolicyService
 
-
 router = APIRouter(
     prefix="/policies",
     tags=["Policies"],

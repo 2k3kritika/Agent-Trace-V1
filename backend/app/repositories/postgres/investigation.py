@@ -4,15 +4,13 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from sqlalchemy import select
-
+from app.core.exceptions import DuplicateResourceError, NotFoundError
 from app.infrastructure.postgres.models import Investigation
-from app.core.exceptions import DuplicateResourceError
 from app.repositories.interfaces import (
     InvestigationRepository,
 )
-from app.core.exceptions import NotFoundError
 from app.repositories.postgres.base import PostgresRepository
+from sqlalchemy import select
 
 
 class PostgresInvestigationRepository(
@@ -29,17 +27,13 @@ class PostgresInvestigationRepository(
     ) -> Investigation:
         """Retrieve an investigation by its public ID."""
         result = await self.session.execute(
-            select(Investigation).where(
-                Investigation.id == investigation_id
-            )
+            select(Investigation).where(Investigation.id == investigation_id)
         )
 
         investigation = result.scalar_one_or_none()
 
         if investigation is None:
-            raise NotFoundError(
-                f"Investigation '{investigation_id}' was not found."
-            )
+            raise NotFoundError(f"Investigation '{investigation_id}' was not found.")
 
         return investigation
 
@@ -87,29 +81,19 @@ class PostgresInvestigationRepository(
         statement = select(Investigation)
 
         if agent_id:
-            statement = statement.where(
-                Investigation.agent_id == agent_id
-            )
+            statement = statement.where(Investigation.agent_id == agent_id)
 
         if severity:
-            statement = statement.where(
-                Investigation.risk_level == severity
-            )
+            statement = statement.where(Investigation.risk_level == severity)
 
         if status:
-            statement = statement.where(
-                Investigation.status == status
-            )
+            statement = statement.where(Investigation.status == status)
 
         if from_timestamp:
-            statement = statement.where(
-                Investigation.created_at >= from_timestamp
-            )
+            statement = statement.where(Investigation.created_at >= from_timestamp)
 
         if to_timestamp:
-            statement = statement.where(
-                Investigation.created_at <= to_timestamp
-            )
+            statement = statement.where(Investigation.created_at <= to_timestamp)
 
         if search:
             pattern = f"%{search.strip()}%"

@@ -1,9 +1,8 @@
 from datetime import datetime
 from typing import Any
 
-from pydantic import Field
-
 from app.schemas.common import APIModel
+from pydantic import Field
 
 
 class DashboardRiskDistribution(APIModel):
@@ -65,10 +64,6 @@ class DashboardOverviewResponse(APIModel):
     alerts: DashboardAlertSummary
     risk_distribution: DashboardRiskDistribution
 
-    recent_security_events: list[DashboardSecurityEvent] = Field(
-        default_factory=list
-    )
+    recent_security_events: list[DashboardSecurityEvent] = Field(default_factory=list)
 
-    metrics: dict[str, Any] = Field(
-        default_factory=dict
-    )
+    metrics: dict[str, Any] = Field(default_factory=dict)

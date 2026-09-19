@@ -37,10 +37,7 @@ class ArtifactService:
         except Exception as exc:
             raise AppError(
                 status_code=400,
-                message=(
-                    "Artifact content must be valid "
-                    "base64 data."
-                ),
+                message=("Artifact content must be valid base64 data."),
             ) from exc
 
         stored = await self.storage.store(
@@ -68,9 +65,7 @@ class ArtifactService:
         storage_uri: str,
     ) -> bytes:
         try:
-            return await self.storage.read(
-                storage_uri
-            )
+            return await self.storage.read(storage_uri)
         except FileNotFoundError as exc:
             raise AppError(
                 status_code=404,
@@ -81,6 +76,4 @@ class ArtifactService:
         self,
         storage_uri: str,
     ) -> None:
-        await self.storage.delete(
-            storage_uri
-        )
+        await self.storage.delete(storage_uri)

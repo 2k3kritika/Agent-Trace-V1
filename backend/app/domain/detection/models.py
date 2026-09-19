@@ -68,11 +68,7 @@ class DetectionBatchResult:
 
     @property
     def findings(self) -> list[DetectionFinding]:
-        return [
-            finding
-            for result in self.results
-            for finding in result.findings
-        ]
+        return [finding for result in self.results for finding in result.findings]
 
     @property
     def detected_count(self) -> int:

@@ -2,11 +2,10 @@ from __future__ import annotations
 
 from typing import Any
 
-from pydantic import Field
-
 from app.domain.events.types import EventSeverity
 from app.schemas.common import APIModel
 from app.schemas.events import CanonicalEventCreate
+from pydantic import Field
 
 
 class DetectionFindingResponse(APIModel):
@@ -24,19 +23,13 @@ class DetectionFindingResponse(APIModel):
 class DetectionResultResponse(APIModel):
     event_id: str
     detected: bool
-    findings: list[DetectionFindingResponse] = Field(
-        default_factory=list
-    )
+    findings: list[DetectionFindingResponse] = Field(default_factory=list)
     highest_severity: EventSeverity | None = None
 
 
 class DetectionBatchResponse(APIModel):
-    results: list[DetectionResultResponse] = Field(
-        default_factory=list
-    )
-    findings: list[DetectionFindingResponse] = Field(
-        default_factory=list
-    )
+    results: list[DetectionResultResponse] = Field(default_factory=list)
+    findings: list[DetectionFindingResponse] = Field(default_factory=list)
     detected_count: int = 0
 
 

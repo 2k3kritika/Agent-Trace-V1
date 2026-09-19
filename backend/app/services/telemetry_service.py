@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping
 from typing import Any
 
-from app.infrastructure.postgres.models import Event
-from app.repositories.interfaces import EventRepository
 from app.schemas.telemetry import (
     TelemetryBatchRequest,
     TelemetryBatchResponse,
@@ -52,26 +50,20 @@ class TelemetryService:
         request: TelemetryBatchRequest,
     ) -> TelemetryBatchResponse:
         payloads = [
-            self._request_to_payload(event_request)
-            for event_request in request.events
+            self._request_to_payload(event_request) for event_request in request.events
         ]
 
-        events, duplicate_count = (
-            await self.event_service.ingest_many(
-                payloads,
-                provider=request.provider,
-                default_agent_id=request.agent_id,
-                default_session_id=request.session_id,
-            )
+        events, duplicate_count = await self.event_service.ingest_many(
+            payloads,
+            provider=request.provider,
+            default_agent_id=request.agent_id,
+            default_session_id=request.session_id,
         )
 
         return TelemetryBatchResponse(
             accepted=len(events),
             duplicates=duplicate_count,
-            event_ids=[
-                event.event_id
-                for event in events
-            ],
+            event_ids=[event.event_id for event in events],
         )
 
     @staticmethod

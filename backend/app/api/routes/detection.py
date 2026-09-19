@@ -10,9 +10,8 @@ from app.schemas.detection import (
     DetectionRequest,
     DetectionResultResponse,
 )
-from app.services.detection_service import DetectionService
 from app.services.dependency import get_detection_service
-
+from app.services.detection_service import DetectionService
 
 router = APIRouter(
     prefix="/detection",
@@ -42,10 +41,7 @@ def _result_to_response(
     return DetectionResultResponse(
         event_id=result.event_id,
         detected=result.detected,
-        findings=[
-            _finding_to_response(finding)
-            for finding in result.findings
-        ],
+        findings=[_finding_to_response(finding) for finding in result.findings],
         highest_severity=result.highest_severity,
     )
 
@@ -62,9 +58,7 @@ async def detect_event(
     Run all configured security detectors against one event.
     """
 
-    event = CanonicalEvent.model_validate(
-        request.event.model_dump()
-    )
+    event = CanonicalEvent.model_validate(request.event.model_dump())
 
     result = service.detect_event(event)
 
@@ -84,20 +78,13 @@ async def detect_events(
     """
 
     events = [
-        CanonicalEvent.model_validate(event.model_dump())
-        for event in request.events
+        CanonicalEvent.model_validate(event.model_dump()) for event in request.events
     ]
 
     batch_result = service.detect_events(events)
 
     return DetectionBatchResponse(
-        results=[
-            _result_to_response(result)
-            for result in batch_result.results
-        ],
-        findings=[
-            _finding_to_response(finding)
-            for finding in batch_result.findings
-        ],
+        results=[_result_to_response(result) for result in batch_result.results],
+        findings=[_finding_to_response(finding) for finding in batch_result.findings],
         detected_count=batch_result.detected_count,
     )

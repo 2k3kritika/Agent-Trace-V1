@@ -4,11 +4,10 @@ from __future__ import annotations
 
 from typing import Any
 
-from sqlalchemy import select
-
 from app.infrastructure.postgres.models import Agent
 from app.repositories.interfaces import AgentRepository
 from app.repositories.postgres.base import PostgresRepository
+from sqlalchemy import select
 
 
 class PostgresAgentRepository(
@@ -30,9 +29,7 @@ class PostgresAgentRepository(
         if agent is None:
             from app.core.exceptions import NotFoundError
 
-            raise NotFoundError(
-                f"Agent with agent_id '{agent_id}' was not found."
-            )
+            raise NotFoundError(f"Agent with agent_id '{agent_id}' was not found.")
 
         return agent
 

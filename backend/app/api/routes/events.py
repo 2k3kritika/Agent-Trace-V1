@@ -12,7 +12,6 @@ from app.services.dependency import (
 )
 from app.services.event_service import EventService
 
-
 router = APIRouter(
     prefix="/events",
     tags=["Events"],
@@ -49,9 +48,7 @@ async def list_events(
         alias="status",
     ),
     search: str | None = None,
-    service: EventService = Depends(
-        get_event_service
-    ),
+    service: EventService = Depends(get_event_service),
 ) -> EventListResponse:
     result = await service.list_events(
         page=page,
@@ -65,16 +62,11 @@ async def list_events(
     )
 
     return EventListResponse(
-        items=[
-            _to_response(event)
-            for event in result.items
-        ],
+        items=[_to_response(event) for event in result.items],
         page=page,
         page_size=page_size,
         total=result.total,
-        has_next=(
-            page * page_size < result.total
-        ),
+        has_next=(page * page_size < result.total),
     )
 
 
@@ -93,9 +85,7 @@ async def list_security_events(
         ge=1,
         le=500,
     ),
-    service: EventService = Depends(
-        get_event_service
-    ),
+    service: EventService = Depends(get_event_service),
 ) -> EventListResponse:
     result = await service.list_security_events(
         session_id=session_id,
@@ -104,16 +94,11 @@ async def list_security_events(
     )
 
     return EventListResponse(
-        items=[
-            _to_response(event)
-            for event in result.items
-        ],
+        items=[_to_response(event) for event in result.items],
         page=page,
         page_size=page_size,
         total=result.total,
-        has_next=(
-            page * page_size < result.total
-        ),
+        has_next=(page * page_size < result.total),
     )
 
 
@@ -132,9 +117,7 @@ async def list_session_events(
         ge=1,
         le=500,
     ),
-    service: EventService = Depends(
-        get_event_service
-    ),
+    service: EventService = Depends(get_event_service),
 ) -> EventListResponse:
     result = await service.list_session_events(
         session_id,
@@ -143,16 +126,11 @@ async def list_session_events(
     )
 
     return EventListResponse(
-        items=[
-            _to_response(event)
-            for event in result.items
-        ],
+        items=[_to_response(event) for event in result.items],
         page=page,
         page_size=page_size,
         total=result.total,
-        has_next=(
-            page * page_size < result.total
-        ),
+        has_next=(page * page_size < result.total),
     )
 
 
@@ -162,14 +140,10 @@ async def list_session_events(
 )
 async def get_event(
     event_id: str,
-    service: EventService = Depends(
-        get_event_service
-    ),
+    service: EventService = Depends(get_event_service),
 ) -> CanonicalEventResponse:
     try:
-        event = await service.get_event(
-            event_id
-        )
+        event = await service.get_event(event_id)
 
         return _to_response(event)
 

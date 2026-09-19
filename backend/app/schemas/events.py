@@ -3,8 +3,6 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from pydantic import Field
-
 from app.domain.events.types import (
     EventRelationshipType,
     EventSeverity,
@@ -12,14 +10,13 @@ from app.domain.events.types import (
     EventType,
 )
 from app.schemas.common import APIModel
+from pydantic import Field
 
 
 class EventDetails(APIModel):
     """Flexible event-specific payload."""
 
-    data: dict[str, Any] = Field(
-        default_factory=dict
-    )
+    data: dict[str, Any] = Field(default_factory=dict)
 
 
 class CanonicalEventCreate(APIModel):
@@ -43,13 +40,9 @@ class CanonicalEventCreate(APIModel):
 
     severity: EventSeverity = EventSeverity.LOW
 
-    details: dict[str, Any] = Field(
-        default_factory=dict
-    )
+    details: dict[str, Any] = Field(default_factory=dict)
 
-    metadata: dict[str, Any] = Field(
-        default_factory=dict
-    )
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
     parent_event_id: str | None = None
     related_event_id: str | None = None
@@ -77,13 +70,9 @@ class CanonicalEventResponse(APIModel):
 
     severity: EventSeverity
 
-    details: dict[str, Any] = Field(
-        default_factory=dict
-    )
+    details: dict[str, Any] = Field(default_factory=dict)
 
-    metadata: dict[str, Any] = Field(
-        default_factory=dict
-    )
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
     parent_event_id: str | None = None
     related_event_id: str | None = None

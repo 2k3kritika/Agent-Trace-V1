@@ -39,21 +39,11 @@ class ForensicService:
                 )
             )
 
-        graph = self._build_attack_graph(
-            ordered_events
-        )
+        graph = self._build_attack_graph(ordered_events)
 
-        timeline_start = (
-            ordered_events[0].timestamp
-            if ordered_events
-            else None
-        )
+        timeline_start = ordered_events[0].timestamp if ordered_events else None
 
-        timeline_end = (
-            ordered_events[-1].timestamp
-            if ordered_events
-            else None
-        )
+        timeline_end = ordered_events[-1].timestamp if ordered_events else None
 
         security_event_count = sum(
             1

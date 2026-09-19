@@ -12,7 +12,6 @@ from app.schemas.telemetry import (
 from app.services.dependency import get_telemetry_service
 from app.services.telemetry_service import TelemetryService
 
-
 router = APIRouter(
     prefix="/telemetry",
     tags=["Telemetry"],
@@ -26,9 +25,7 @@ router = APIRouter(
 )
 async def ingest_event(
     request: TelemetryEventRequest,
-    service: TelemetryService = Depends(
-        get_telemetry_service
-    ),
+    service: TelemetryService = Depends(get_telemetry_service),
 ) -> TelemetryIngestResponse:
     try:
         return await service.ingest_event(request)
@@ -47,9 +44,7 @@ async def ingest_event(
 )
 async def ingest_event_batch(
     request: TelemetryBatchRequest,
-    service: TelemetryService = Depends(
-        get_telemetry_service
-    ),
+    service: TelemetryService = Depends(get_telemetry_service),
 ) -> TelemetryBatchResponse:
     try:
         return await service.ingest_batch(request)

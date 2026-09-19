@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.infrastructure.postgres.models import User
 from app.repositories.postgres.base import PostgresRepository
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class PostgresUserRepository(PostgresRepository[User]):
@@ -16,9 +15,7 @@ class PostgresUserRepository(PostgresRepository[User]):
         email: str,
     ) -> User | None:
         result = await self.db.execute(
-            select(User).where(
-                User.email == email.lower().strip()
-            )
+            select(User).where(User.email == email.lower().strip())
         )
 
         return result.scalar_one_or_none()
@@ -41,9 +38,7 @@ class PostgresUserRepository(PostgresRepository[User]):
         email: str,
     ) -> bool:
         result = await self.db.execute(
-            select(User.id).where(
-                User.email == email.lower().strip()
-            )
+            select(User.id).where(User.email == email.lower().strip())
         )
 
         return result.scalar_one_or_none() is not None

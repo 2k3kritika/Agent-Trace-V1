@@ -1,7 +1,6 @@
-from pydantic import Field
-
 from app.domain.events.types import EventRelationshipType
 from app.schemas.common import APIModel
+from pydantic import Field
 
 
 class CorrelationRequest(APIModel):
@@ -22,6 +21,4 @@ class CorrelationResponse(APIModel):
     event_count: int
     relationship_count: int
 
-    relationships: list[CorrelationRelationshipResponse] = Field(
-        default_factory=list
-    )
+    relationships: list[CorrelationRelationshipResponse] = Field(default_factory=list)

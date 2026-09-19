@@ -33,9 +33,7 @@ async def create_report(
 )
 async def list_reports(
     pagination: PaginationParams = Depends(),
-    investigation_id: str | None = Query(
-        default=None
-    ),
+    investigation_id: str | None = Query(default=None),
     service: ReportService = Depends(get_report_service),
 ) -> ReportListResponse:
     return await service.list_reports(

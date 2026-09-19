@@ -38,9 +38,7 @@ class InvestigationService:
                 "sensitive_action_attempted": (
                     investigation.sensitive_action_attempted
                 ),
-                "sensitive_action_executed": (
-                    investigation.sensitive_action_executed
-                ),
+                "sensitive_action_executed": (investigation.sensitive_action_executed),
                 "policy_violation": investigation.policy_violation,
                 "action_blocked": investigation.action_blocked,
                 "external_transmission": investigation.external_transmission,
@@ -107,20 +105,14 @@ class InvestigationService:
             risk_level=severity.value if severity else None,
         )
 
-        items = [
-            self._to_response(investigation)
-            for investigation in result.items
-        ]
+        items = [self._to_response(investigation) for investigation in result.items]
 
         return InvestigationListResponse(
             items=items,
             page=pagination.page,
             page_size=pagination.page_size,
             total=result.total,
-            has_next=(
-                pagination.page * pagination.page_size
-                < result.total
-            ),
+            has_next=(pagination.page * pagination.page_size < result.total),
         )
 
     async def update_investigation(

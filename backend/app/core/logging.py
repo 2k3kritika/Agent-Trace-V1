@@ -11,10 +11,9 @@ import sys
 import time
 from contextvars import ContextVar
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, ClassVar
 
 from app.core.constants import REQUEST_ID_HEADER
-
 
 _request_id: ContextVar[str | None] = ContextVar(
     "agenttrace_request_id",
@@ -25,7 +24,7 @@ _request_id: ContextVar[str | None] = ContextVar(
 class JsonFormatter(logging.Formatter):
     """Format log records as structured JSON."""
 
-    RESERVED_FIELDS = {
+    RESERVED_FIELDS: ClassVar[set[str]] = {
         "name",
         "msg",
         "args",
@@ -110,8 +109,7 @@ def configure_logging(level: str = "INFO") -> None:
     # Avoid installing duplicate handlers when tests or reloaders initialize
     # the application more than once.
     if not any(
-        isinstance(handler.formatter, JsonFormatter)
-        for handler in root_logger.handlers
+        isinstance(handler.formatter, JsonFormatter) for handler in root_logger.handlers
     ):
         handler = logging.StreamHandler(sys.stdout)
         handler.setFormatter(JsonFormatter())
@@ -172,10 +170,7 @@ class RequestLoggingMiddleware:
 
                 request_id_bytes = REQUEST_ID_HEADER.lower().encode()
 
-                if not any(
-                    key.lower() == request_id_bytes
-                    for key, _ in headers
-                ):
+                if not any(key.lower() == request_id_bytes for key, _ in headers):
                     headers.append(
                         (
                             request_id_bytes,

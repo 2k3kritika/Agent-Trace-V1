@@ -29,9 +29,7 @@ class AuthService:
     ) -> UserResponse:
         normalized_email = request.email.lower().strip()
 
-        if await self.repository.email_exists(
-            normalized_email
-        ):
+        if await self.repository.email_exists(normalized_email):
             raise AppError(
                 status_code=409,
                 message="A user with this email already exists.",
@@ -56,9 +54,7 @@ class AuthService:
     ) -> TokenResponse:
         normalized_email = request.email.lower().strip()
 
-        user = await self.repository.get_by_email(
-            normalized_email
-        )
+        user = await self.repository.get_by_email(normalized_email)
 
         if user is None:
             raise AppError(
@@ -101,9 +97,7 @@ class AuthService:
         self,
         user_id: str,
     ) -> UserResponse:
-        user = await self.repository.get_active_by_id(
-            user_id
-        )
+        user = await self.repository.get_active_by_id(user_id)
 
         if user is None:
             raise AppError(

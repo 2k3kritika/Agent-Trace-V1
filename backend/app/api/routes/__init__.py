@@ -2,6 +2,8 @@ from app.api.routes import (
     agents,
     alerts,
     artifacts,
+    audit,
+    auth,
     correlation,
     dashboard,
     detection,
@@ -17,19 +19,23 @@ from app.api.routes import (
     telemetry,
 )
 
-from app.api.routes import auth
-
 __all__ = [
     "agents",
     "alerts",
+    "artifacts",
+    "audit",
+    "auth",
     "correlation",
+    "dashboard",
     "detection",
     "events",
     "evidence",
     "forensics",
+    "health",
     "integrations",
     "investigations",
     "policy",
+    "reports",
     "sessions",
     "telemetry",
 ]

@@ -41,9 +41,7 @@ class InvestigationForensicService:
         )
 
         events = [
-            CanonicalEvent.model_validate(
-                event.model_dump(mode="python")
-            )
+            CanonicalEvent.model_validate(event.model_dump(mode="python"))
             for event in event_responses
         ]
 
@@ -64,9 +62,7 @@ class InvestigationForensicService:
         investigation_id: str,
         result: ForensicAnalysisResult,
     ) -> None:
-        existing = await self.investigation_service.get_investigation(
-            investigation_id
-        )
+        existing = await self.investigation_service.get_investigation(investigation_id)
 
         if existing is None:
             raise InvestigationNotFoundError(
@@ -78,10 +74,7 @@ class InvestigationForensicService:
         existing_summary.update(
             {
                 "forensic_findings": len(result.findings),
-                "timeline": [
-                    item.model_dump(mode="json")
-                    for item in result.timeline
-                ],
+                "timeline": [item.model_dump(mode="json") for item in result.timeline],
                 "event_count": result.event_count,
                 "security_event_count": result.security_event_count,
                 "suspicious_event_count": result.suspicious_event_count,

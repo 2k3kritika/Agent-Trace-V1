@@ -24,9 +24,7 @@ router = APIRouter(
 async def analyze_investigation(
     investigation_id: str,
     request: ForensicAnalysisRequest,
-    service: InvestigationForensicService = Depends(
-        get_investigation_forensic_service
-    ),
+    service: InvestigationForensicService = Depends(get_investigation_forensic_service),
 ) -> ForensicAnalysisResponse:
     result = await service.analyze(
         investigation_id=investigation_id,
@@ -41,6 +39,4 @@ async def analyze_investigation(
     if not request.include_attack_graph:
         result.graph = None
 
-    return ForensicAnalysisResponse.model_validate(
-        result.model_dump(mode="python")
-    )
+    return ForensicAnalysisResponse.model_validate(result.model_dump(mode="python"))

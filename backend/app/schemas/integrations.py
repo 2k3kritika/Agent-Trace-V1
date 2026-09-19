@@ -3,9 +3,8 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from pydantic import Field
-
 from app.schemas.common import APIModel
+from pydantic import Field
 
 
 class IntegrationCreateRequest(APIModel):
@@ -41,9 +40,7 @@ class IntegrationCreateRequest(APIModel):
         max_length=50,
     )
 
-    configuration: dict[str, Any] = Field(
-        default_factory=dict
-    )
+    configuration: dict[str, Any] = Field(default_factory=dict)
 
 
 class IntegrationUpdateRequest(APIModel):
@@ -75,9 +72,7 @@ class IntegrationResponse(APIModel):
 
     status: str
 
-    configuration: dict[str, Any] = Field(
-        default_factory=dict
-    )
+    configuration: dict[str, Any] = Field(default_factory=dict)
 
     created_at: datetime
     updated_at: datetime

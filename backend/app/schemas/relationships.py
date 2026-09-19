@@ -1,10 +1,9 @@
 from datetime import datetime
 from typing import Any
 
-from pydantic import Field
-
 from app.domain.events.types import EventRelationshipType
 from app.schemas.common import APIModel
+from pydantic import Field
 
 
 class EventRelationshipCreateRequest(APIModel):

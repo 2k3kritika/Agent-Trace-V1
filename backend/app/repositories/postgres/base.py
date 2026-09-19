@@ -4,13 +4,11 @@ from __future__ import annotations
 
 from typing import Any, Generic, TypeVar
 
+from app.core.exceptions import DuplicateResourceError, NotFoundError, RepositoryError
 from sqlalchemy import Select, delete, func, select, update
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.exceptions import RepositoryError
-from app.core.exceptions import NotFoundError
-from app.core.exceptions import DuplicateResourceError
 ModelT = TypeVar("ModelT")
 
 
@@ -161,9 +159,7 @@ class PostgresRepository(Generic[ModelT]):
 
             offset = (page - 1) * page_size
 
-            result = await self.session.execute(
-                query.offset(offset).limit(page_size)
-            )
+            result = await self.session.execute(query.offset(offset).limit(page_size))
 
             records = list(result.scalars().all())
 

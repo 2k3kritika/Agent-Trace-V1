@@ -16,7 +16,6 @@ from app.services.integration_service import (
     IntegrationService,
 )
 
-
 router = APIRouter(
     prefix="/integrations",
     tags=["Integrations"],
@@ -37,24 +36,18 @@ def _to_response(integration) -> IntegrationResponse:
 )
 async def create_integration(
     request: IntegrationCreateRequest,
-    service: IntegrationService = Depends(
-        get_integration_service
-    ),
+    service: IntegrationService = Depends(get_integration_service),
 ) -> IntegrationResponse:
     try:
-        integration = (
-            await service.create_integration(
-                agent_id=request.agent_id,
-                integration_type=request.integration_type,
-                provider=request.provider,
-                endpoint=request.endpoint,
-                api_key_reference=(
-                    request.api_key_reference
-                ),
-                environment=request.environment,
-                status=request.status,
-                configuration=request.configuration,
-            )
+        integration = await service.create_integration(
+            agent_id=request.agent_id,
+            integration_type=request.integration_type,
+            provider=request.provider,
+            endpoint=request.endpoint,
+            api_key_reference=(request.api_key_reference),
+            environment=request.environment,
+            status=request.status,
+            configuration=request.configuration,
         )
 
         return _to_response(integration)
@@ -87,9 +80,7 @@ async def list_integrations(
     ),
     provider: str | None = None,
     integration_type: str | None = None,
-    service: IntegrationService = Depends(
-        get_integration_service
-    ),
+    service: IntegrationService = Depends(get_integration_service),
 ) -> IntegrationListResponse:
     result = await service.list_integrations(
         page=page,
@@ -101,16 +92,11 @@ async def list_integrations(
     )
 
     return IntegrationListResponse(
-        items=[
-            _to_response(item)
-            for item in result.items
-        ],
+        items=[_to_response(item) for item in result.items],
         page=page,
         page_size=page_size,
         total=result.total,
-        has_next=(
-            page * page_size < result.total
-        ),
+        has_next=(page * page_size < result.total),
     )
 
 
@@ -120,16 +106,10 @@ async def list_integrations(
 )
 async def get_integration(
     integration_id: str,
-    service: IntegrationService = Depends(
-        get_integration_service
-    ),
+    service: IntegrationService = Depends(get_integration_service),
 ) -> IntegrationResponse:
     try:
-        integration = (
-            await service.get_integration(
-                integration_id
-            )
-        )
+        integration = await service.get_integration(integration_id)
 
         return _to_response(integration)
 
@@ -147,19 +127,15 @@ async def get_integration(
 async def update_integration(
     integration_id: str,
     request: IntegrationUpdateRequest,
-    service: IntegrationService = Depends(
-        get_integration_service
-    ),
+    service: IntegrationService = Depends(get_integration_service),
 ) -> IntegrationResponse:
     try:
-        integration = (
-            await service.update_integration(
-                integration_id,
-                status=request.status,
-                endpoint=request.endpoint,
-                environment=request.environment,
-                configuration=request.configuration,
-            )
+        integration = await service.update_integration(
+            integration_id,
+            status=request.status,
+            endpoint=request.endpoint,
+            environment=request.environment,
+            configuration=request.configuration,
         )
 
         return _to_response(integration)
@@ -177,14 +153,10 @@ async def update_integration(
 )
 async def delete_integration(
     integration_id: str,
-    service: IntegrationService = Depends(
-        get_integration_service
-    ),
+    service: IntegrationService = Depends(get_integration_service),
 ) -> None:
     try:
-        await service.delete_integration(
-            integration_id
-        )
+        await service.delete_integration(integration_id)
 
     except NotFoundError as exc:
         raise HTTPException(

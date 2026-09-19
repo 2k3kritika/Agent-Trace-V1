@@ -28,19 +28,11 @@ class DashboardService:
     ) -> DashboardOverviewResponse:
         agents = await self.repository.count_agents()
         sessions = await self.repository.count_sessions()
-        investigations = (
-            await self.repository.count_investigations()
-        )
+        investigations = await self.repository.count_investigations()
         alerts = await self.repository.count_alerts()
-        risk_distribution = (
-            await self.repository.risk_distribution()
-        )
+        risk_distribution = await self.repository.risk_distribution()
 
-        events = (
-            await self.repository.recent_security_events(
-                limit=10
-            )
-        )
+        events = await self.repository.recent_security_events(limit=10)
 
         recent_events = [
             DashboardSecurityEvent(
@@ -52,11 +44,7 @@ class DashboardService:
                 severity=event.severity,
                 status=event.status,
                 tool=event.tool,
-                title=(
-                    event.details.get("title")
-                    if event.details
-                    else None
-                ),
+                title=(event.details.get("title") if event.details else None),
             )
             for event in events
         ]
@@ -65,13 +53,9 @@ class DashboardService:
             generated_at=datetime.now(timezone.utc),
             agents=DashboardAgentSummary(**agents),
             sessions=DashboardSessionSummary(**sessions),
-            investigations=DashboardInvestigationSummary(
-                **investigations
-            ),
+            investigations=DashboardInvestigationSummary(**investigations),
             alerts=DashboardAlertSummary(**alerts),
-            risk_distribution=DashboardRiskDistribution(
-                **risk_distribution
-            ),
+            risk_distribution=DashboardRiskDistribution(**risk_distribution),
             recent_security_events=recent_events,
             metrics={
                 "security_events_last_24h": await self._events_last_24h(),

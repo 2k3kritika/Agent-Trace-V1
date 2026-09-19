@@ -14,7 +14,6 @@ from app.schemas.auth import (
 from app.services.auth_service import AuthService
 from app.services.dependency import get_auth_service
 
-
 router = APIRouter(
     prefix="/auth",
     tags=["authentication"],
@@ -64,9 +63,7 @@ async def refresh(
     response_model=MeResponse,
 )
 async def me(
-    credentials: HTTPAuthorizationCredentials | None = Depends(
-        bearer_scheme
-    ),
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
     service: AuthService = Depends(get_auth_service),
 ) -> MeResponse:
     if credentials is None:
@@ -83,6 +80,4 @@ async def me(
         expected_type="access",
     )
 
-    return await service.get_user(
-        str(payload["sub"])
-    )
+    return await service.get_user(str(payload["sub"]))

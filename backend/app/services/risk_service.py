@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
+from typing import ClassVar
 
 from app.domain.detection.models import DetectionFinding
 from app.domain.events.types import EventSeverity
@@ -20,14 +21,14 @@ class RiskService:
     scoring makes the displayed risk score auditable.
     """
 
-    _severity_points = {
+    severity_points: ClassVar[dict[EventSeverity, int]] = {
         EventSeverity.LOW: 5,
         EventSeverity.MEDIUM: 15,
         EventSeverity.HIGH: 25,
         EventSeverity.CRITICAL: 40,
     }
 
-    _detector_points = {
+    detector_points: ClassVar[dict[str, int]] = {
         "UNTRUSTED_CONTENT": 10,
         "PROMPT_INJECTION_DETECTED": 30,
         "SENSITIVE_ACTION_ATTEMPTED": 30,
@@ -65,10 +66,7 @@ class RiskService:
             context,
         )
 
-        raw_score = sum(
-            contribution.points
-            for contribution in contributions
-        )
+        raw_score = sum(contribution.points for contribution in contributions)
 
         score = min(raw_score, 100)
 
@@ -116,12 +114,12 @@ class RiskService:
         self,
         finding: DetectionFinding,
     ) -> int:
-        detector_points = self._detector_points.get(
+        detector_points = self.detector_points.get(
             finding.detector_id,
             0,
         )
 
-        severity_points = self._severity_points.get(
+        severity_points = self.severity_points.get(
             finding.severity,
             0,
         )
@@ -134,10 +132,7 @@ class RiskService:
         # Detector-specific points carry most of the weight. Severity adds
         # context without allowing a single low-confidence finding to
         # dominate the entire assessment.
-        points = (
-            detector_points
-            + int(severity_points * confidence_multiplier)
-        )
+        points = detector_points + int(severity_points * confidence_multiplier)
 
         return max(1, points)
 
@@ -206,21 +201,24 @@ class RiskService:
                 factors.append(factor)
                 seen.add(factor)
 
-        if context.sensitive_action_attempted:
-            if "Sensitive action attempted" not in seen:
-                factors.append("Sensitive action attempted")
+        if (
+            context.sensitive_action_attempted
+            and "Sensitive action attempted" not in seen
+        ):
+            factors.append("Sensitive action attempted")
+            seen.add("Sensitive action attempted")
 
-        if context.policy_violation:
-            if "Policy violation" not in seen:
-                factors.append("Policy violation")
+        if context.policy_violation and "Policy violation" not in seen:
+            factors.append("Policy violation")
+            seen.add("Policy violation")
 
-        if context.action_blocked:
-            if "Action blocked by policy" not in seen:
-                factors.append("Action blocked by policy")
+        if context.action_blocked and "Action blocked by policy" not in seen:
+            factors.append("Action blocked by policy")
+            seen.add("Action blocked by policy")
 
-        if context.external_transmission:
-            if "External transmission" not in seen:
-                factors.append("External transmission")
+        if context.external_transmission and "External transmission" not in seen:
+            factors.append("External transmission")
+            seen.add("External transmission")
 
         return factors
 

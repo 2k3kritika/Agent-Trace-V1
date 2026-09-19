@@ -1,18 +1,9 @@
-"""
-Domain-level event type definitions.
-
-These values describe AgentTrace semantics rather than any specific
-provider or framework.
-"""
-
 from __future__ import annotations
 
 from enum import StrEnum
 
 
 class EventType(StrEnum):
-    """Canonical AgentTrace event types."""
-
     AGENT_STARTED = "AGENT_STARTED"
     AGENT_COMPLETED = "AGENT_COMPLETED"
 
@@ -25,7 +16,6 @@ class EventType(StrEnum):
 
     CONTENT_RETRIEVED = "CONTENT_RETRIEVED"
     UNTRUSTED_CONTENT = "UNTRUSTED_CONTENT"
-
     PROMPT_INJECTION_DETECTED = "PROMPT_INJECTION_DETECTED"
 
     SENSITIVE_ACTION_ATTEMPTED = "SENSITIVE_ACTION_ATTEMPTED"
@@ -38,28 +28,23 @@ class EventType(StrEnum):
 
     ERROR = "ERROR"
 
+    AUDIT_LOG = "AUDIT_LOG"
+
 
 class EventStatus(StrEnum):
-    """Canonical processing/execution status values."""
-
     RECEIVED = "RECEIVED"
     REQUESTED = "REQUESTED"
     STARTED = "STARTED"
-
     SUCCEEDED = "SUCCEEDED"
     FAILED = "FAILED"
-
     ATTEMPTED = "ATTEMPTED"
     BLOCKED = "BLOCKED"
     ALLOWED = "ALLOWED"
-
     SIMULATED = "SIMULATED"
     COMPLETED = "COMPLETED"
 
 
 class EventSeverity(StrEnum):
-    """Severity associated with a canonical event."""
-
     LOW = "LOW"
     MEDIUM = "MEDIUM"
     HIGH = "HIGH"
@@ -67,8 +52,6 @@ class EventSeverity(StrEnum):
 
 
 class EventRelationshipType(StrEnum):
-    """Supported event-to-event relationship types."""
-
     PARENT = "PARENT"
     RELATED = "RELATED"
     CAUSED_BY = "CAUSED_BY"

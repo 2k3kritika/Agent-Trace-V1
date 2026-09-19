@@ -69,15 +69,13 @@ class SensitiveActionAfterInjectionRule(ForensicRule):
         injection_indexes = [
             index
             for index, event in enumerate(events)
-            if event.event_type
-            == EventType.PROMPT_INJECTION_DETECTED
+            if event.event_type == EventType.PROMPT_INJECTION_DETECTED
         ]
 
         action_indexes = [
             index
             for index, event in enumerate(events)
-            if event.event_type
-            == EventType.SENSITIVE_ACTION_ATTEMPTED
+            if event.event_type == EventType.SENSITIVE_ACTION_ATTEMPTED
         ]
 
         if not injection_indexes or not action_indexes:
@@ -87,8 +85,7 @@ class SensitiveActionAfterInjectionRule(ForensicRule):
 
         for action_index in action_indexes:
             previous_injection = any(
-                injection_index <= action_index
-                for injection_index in injection_indexes
+                injection_index <= action_index for injection_index in injection_indexes
             )
 
             if previous_injection:
@@ -97,10 +94,7 @@ class SensitiveActionAfterInjectionRule(ForensicRule):
         if not related_events:
             return []
 
-        event_ids = [
-            event.event_id
-            for event in related_events
-        ]
+        event_ids = [event.event_id for event in related_events]
 
         return [
             ForensicFinding(
@@ -132,9 +126,7 @@ class PolicyViolationRule(ForensicRule):
         events: list[CanonicalEvent],
     ) -> list[ForensicFinding]:
         violations = [
-            event
-            for event in events
-            if event.event_type == EventType.POLICY_VIOLATION
+            event for event in events if event.event_type == EventType.POLICY_VIOLATION
         ]
 
         if not violations:
@@ -152,10 +144,7 @@ class PolicyViolationRule(ForensicRule):
                     "an active security policy."
                 ),
                 confidence=0.99,
-                event_ids=[
-                    event.event_id
-                    for event in violations
-                ],
+                event_ids=[event.event_id for event in violations],
                 indicators=[
                     "POLICY_VIOLATION",
                 ],
@@ -172,9 +161,7 @@ class ToolBlockedRule(ForensicRule):
         events: list[CanonicalEvent],
     ) -> list[ForensicFinding]:
         blocked = [
-            event
-            for event in events
-            if event.event_type == EventType.TOOL_BLOCKED
+            event for event in events if event.event_type == EventType.TOOL_BLOCKED
         ]
 
         if not blocked:
@@ -192,10 +179,7 @@ class ToolBlockedRule(ForensicRule):
                     "by the security policy."
                 ),
                 confidence=0.99,
-                event_ids=[
-                    event.event_id
-                    for event in blocked
-                ],
+                event_ids=[event.event_id for event in blocked],
                 indicators=[
                     "TOOL_BLOCKED",
                 ],

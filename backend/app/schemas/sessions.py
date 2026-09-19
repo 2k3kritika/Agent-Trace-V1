@@ -3,9 +3,8 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from pydantic import Field
-
 from app.schemas.common import APIModel
+from pydantic import Field
 
 
 class SessionCreateRequest(APIModel):
@@ -26,9 +25,7 @@ class SessionCreateRequest(APIModel):
 
     scenario: str | None = None
 
-    metadata: dict[str, Any] = Field(
-        default_factory=dict
-    )
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class SessionResponse(APIModel):
@@ -53,9 +50,7 @@ class SessionResponse(APIModel):
 
     investigation_id: str | None = None
 
-    metadata: dict[str, Any] = Field(
-        default_factory=dict
-    )
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
     created_at: datetime
     updated_at: datetime

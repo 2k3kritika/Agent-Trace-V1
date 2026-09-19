@@ -29,9 +29,7 @@ class AgentService:
         self,
         agent_id: str,
     ) -> Agent | None:
-        return await self.repository.get_optional_by_agent_id(
-            agent_id
-        )
+        return await self.repository.get_optional_by_agent_id(agent_id)
 
     async def register_agent(
         self,
@@ -44,9 +42,7 @@ class AgentService:
         integration_type: str | None = None,
         capabilities: dict[str, Any] | None = None,
     ) -> Agent:
-        existing = await self.repository.get_optional_by_agent_id(
-            agent_id
-        )
+        existing = await self.repository.get_optional_by_agent_id(agent_id)
 
         if existing is not None:
             return existing

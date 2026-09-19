@@ -1,7 +1,4 @@
 from contextlib import asynccontextmanager
-from app.api.routes import evidence
-from app.api.routes import dashboard
-from app.api.routes import artifacts
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,7 +6,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes import (
     agents,
     alerts,
+    artifacts,
+    audit,
+    auth,
     correlation,
+    dashboard,
     detection,
     events,
     evidence,
@@ -24,10 +25,8 @@ from app.api.routes.health import router as health_router
 from app.core.config import get_settings
 from app.core.logging import RequestLoggingMiddleware
 from app.infrastructure.postgres.database import dispose_engine
-from app.api.routes import auth
 
 settings = get_settings()
-
 
 
 @asynccontextmanager
@@ -92,11 +91,11 @@ app.include_router(policy.router)
 app.include_router(forensics.router)
 app.include_router(dashboard.router)
 
-app.include_router(
-    artifacts.router
-)
+app.include_router(artifacts.router)
 
 app.include_router(auth.router)
+app.include_router(audit.router)
+
 
 @app.get("/", tags=["Root"])
 async def root() -> dict[str, str]:

@@ -1,14 +1,11 @@
 from __future__ import annotations
 
-from sqlalchemy import select
-
 from app.infrastructure.postgres.models import Report
 from app.repositories.postgres.base import PostgresRepository
+from sqlalchemy import select
 
 
-class PostgresReportRepository(
-    PostgresRepository[Report]
-):
+class PostgresReportRepository(PostgresRepository[Report]):
     model = Report
 
     async def get_by_investigation(
@@ -17,12 +14,8 @@ class PostgresReportRepository(
     ) -> list[Report]:
         result = await self.session.execute(
             select(Report)
-            .where(
-                Report.investigation_id == investigation_id
-            )
-            .order_by(
-                Report.created_at.desc()
-            )
+            .where(Report.investigation_id == investigation_id)
+            .order_by(Report.created_at.desc())
         )
 
         return list(result.scalars().all())
@@ -33,12 +26,8 @@ class PostgresReportRepository(
     ) -> Report | None:
         result = await self.session.execute(
             select(Report)
-            .where(
-                Report.investigation_id == investigation_id
-            )
-            .order_by(
-                Report.created_at.desc()
-            )
+            .where(Report.investigation_id == investigation_id)
+            .order_by(Report.created_at.desc())
             .limit(1)
         )
 

@@ -11,7 +11,6 @@ from typing import Any
 from app.core.config import get_settings
 from app.core.exceptions import AppError
 
-
 settings = get_settings()
 
 
@@ -204,9 +203,7 @@ def decode_token(
 
         encoded_header, encoded_payload, encoded_signature = parts
 
-        signing_input = (
-            f"{encoded_header}.{encoded_payload}".encode("ascii")
-        )
+        signing_input = f"{encoded_header}.{encoded_payload}".encode("ascii")
 
         expected_signature = _sign(signing_input)
 
@@ -216,13 +213,9 @@ def decode_token(
         ):
             raise ValueError("Invalid token signature.")
 
-        header = json.loads(
-            _b64decode(encoded_header).decode("utf-8")
-        )
+        header = json.loads(_b64decode(encoded_header).decode("utf-8"))
 
-        payload = json.loads(
-            _b64decode(encoded_payload).decode("utf-8")
-        )
+        payload = json.loads(_b64decode(encoded_payload).decode("utf-8"))
 
         if header.get("alg") != settings.jwt_algorithm:
             raise ValueError("Unsupported token algorithm.")
@@ -233,7 +226,7 @@ def decode_token(
         expiration = payload.get("exp")
 
         if not isinstance(expiration, int):
-            raise ValueError("Invalid expiration.")
+            raise TypeError("Invalid expiration.")
 
         if expiration <= int(time.time()):
             raise ValueError("Token expired.")
