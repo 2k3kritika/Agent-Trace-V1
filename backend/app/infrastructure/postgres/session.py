@@ -12,6 +12,7 @@ from collections.abc import AsyncGenerator, AsyncIterator
 from contextlib import asynccontextmanager
 
 from app.infrastructure.postgres.database import AsyncSessionFactory
+from app.repositories.factory import is_dynamodb_backend
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -33,14 +34,16 @@ async def session_scope() -> AsyncIterator[AsyncSession]:
             raise
 
 
-async def get_repository_session() -> AsyncGenerator[AsyncSession, None]:
+async def get_repository_session() -> AsyncGenerator[AsyncSession | None, None]:
     """
-    Dependency/helper for repository implementations.
+    Provide a repository session for PostgreSQL.
 
-    Unlike session_scope(), this function does not automatically commit.
-    Repository methods can explicitly control transaction boundaries when
-    multiple operations need to participate in one transaction.
+    DynamoDB-backed environments do not require a PostgreSQL session,
+    so they receive None instead.
     """
+    if is_dynamodb_backend():
+        yield None
+        return
 
     async with AsyncSessionFactory() as session:
         try:

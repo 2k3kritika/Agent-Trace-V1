@@ -1,6 +1,5 @@
-from app.repositories.dynamodb.agent import DynamoDBAgentRepository
+from app.repositories.dynamodb.agents import DynamoDBAgentRepository
 from app.repositories.dynamodb.alert import DynamoDBAlertRepository
-from app.repositories.dynamodb.base import DynamoDBRepository
 from app.repositories.dynamodb.event import DynamoDBEventRepository
 from app.repositories.dynamodb.evidence import DynamoDBEvidenceRepository
 from app.repositories.dynamodb.integration import DynamoDBIntegrationRepository
@@ -19,7 +18,6 @@ __all__ = [
     "DynamoDBInvestigationRepository",
     "DynamoDBPolicyRepository",
     "DynamoDBReportRepository",
-    "DynamoDBRepository",
     "DynamoDBSessionRepository",
     "DynamoDBUserRepository",
 ]

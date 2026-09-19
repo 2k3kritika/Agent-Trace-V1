@@ -1,0 +1,13 @@
+version = 0.1
+
+[default.deploy.parameters]
+stack_name = "agenttrace"
+resolve_s3 = true
+s3_prefix = "agenttrace"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "Environment=\"dev\" TableName=\"agenttrace\" ArtifactBucketName=\"\""
+image_repositories = []
+
+[default.global.parameters]
+region = "ap-south-1"

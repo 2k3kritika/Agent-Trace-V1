@@ -1,0 +1,185 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+
+Description: >
+  AgentTrace - AI Agent Security Telemetry and Forensics Platform
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+
+  TableName:
+    Type: String
+    Default: agenttrace
+
+  ArtifactBucketName:
+    Type: String
+    Default: ""
+
+Conditions:
+  HasCustomBucketName: !Not
+    - !Equals
+      - !Ref ArtifactBucketName
+      - ""
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Timeout: 30
+    MemorySize: 512
+    Architectures:
+      - x86_64
+
+Resources:
+
+  # ------------------------------------------------------------
+  # DynamoDB
+  # ------------------------------------------------------------
+
+  AgentTraceTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Ref TableName
+      BillingMode: PAY_PER_REQUEST
+
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: SK
+          AttributeType: S
+
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+        - AttributeName: SK
+          KeyType: RANGE
+
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
+      SSESpecification:
+        SSEEnabled: true
+
+      Tags:
+        - Key: Project
+          Value: AgentTrace
+        - Key: Environment
+          Value: !Ref Environment
+
+  # ------------------------------------------------------------
+  # S3
+  # ------------------------------------------------------------
+
+  ArtifactBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !If
+        - HasCustomBucketName
+        - !Ref ArtifactBucketName
+        - !Ref AWS::NoValue
+
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+      VersioningConfiguration:
+        Status: Enabled
+
+      Tags:
+        - Key: Project
+          Value: AgentTrace
+        - Key: Environment
+          Value: !Ref Environment
+
+  # ------------------------------------------------------------
+  # Lambda
+  # ------------------------------------------------------------
+
+  AgentTraceFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "agenttrace-${Environment}"
+
+      CodeUri: ../../backend
+
+      Handler: app.lambda_handler.handler
+
+      Environment:
+        Variables:
+          APP_NAME: AgentTrace
+          APP_ENV: "aws"
+          DEBUG: "false"
+          LOG_LEVEL: INFO
+
+          STORAGE_BACKEND: dynamodb
+
+          
+          DYNAMODB_TABLE: !Ref AgentTraceTable
+          S3_BUCKET: !Ref ArtifactBucket
+
+          AUTH_ENABLED: "true"
+
+          ENABLE_BEDROCK: "false"
+
+          MAX_TELEMETRY_PAYLOAD_BYTES: "1000000"
+
+      Policies:
+
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AgentTraceTable
+
+        - S3ReadPolicy:
+            BucketName: !Ref ArtifactBucket
+
+        - S3WritePolicy:
+            BucketName: !Ref ArtifactBucket
+
+      Events:
+
+        ApiRoot:
+          Type: Api
+          Properties:
+            Path: /
+            Method: ANY
+
+        ApiProxy:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+
+      Tags:
+        Project: AgentTrace
+        Environment: !Ref Environment
+
+Outputs:
+
+  AgentTraceApiUrl:
+    Description: AgentTrace API Gateway endpoint
+    Value: !Sub
+      - "https://${ApiId}.execute-api.${AWS::Region}.amazonaws.com/${Environment}/"
+      - ApiId: !Ref ServerlessRestApi
+
+  AgentTraceFunctionArn:
+    Description: AgentTrace Lambda ARN
+    Value: !GetAtt AgentTraceFunction.Arn
+
+  AgentTraceTableName:
+    Description: DynamoDB table name
+    Value: !Ref AgentTraceTable
+
+  AgentTraceArtifactBucket:
+    Description: S3 artifact bucket
+    Value: !Ref ArtifactBucket

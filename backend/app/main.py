@@ -30,6 +30,11 @@ from app.infrastructure.postgres.database import dispose_engine
 
 settings = get_settings()
 
+# API Gateway stage path.
+# Locally the API is served at /.
+# On AWS SAM/API Gateway the API is served under /Prod.
+root_path = "/Prod" if settings.app_env == "aws" else ""
+
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
@@ -53,6 +58,7 @@ app = FastAPI(
     version="0.1.0",
     debug=settings.debug,
     lifespan=lifespan,
+    root_path=root_path,
 )
 
 
@@ -99,6 +105,10 @@ app.include_router(auth.router)
 app.include_router(audit.router)
 app.include_router(demo.router)
 
+
+# ---------------------------------------------------------------------------
+# Root
+# ---------------------------------------------------------------------------
 
 @app.get("/", tags=["Root"])
 async def root() -> dict[str, str]:
