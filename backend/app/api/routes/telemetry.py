@@ -10,8 +10,8 @@ from app.schemas.telemetry import (
     TelemetryIngestResponse,
 )
 from app.services.dependency import get_telemetry_service
-from app.services.event_service import EventServiceError
 from app.services.telemetry_service import TelemetryService
+
 
 router = APIRouter(
     prefix="/telemetry",
@@ -33,12 +33,6 @@ async def ingest_event(
     try:
         return await service.ingest_event(request)
 
-    except EventServiceError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=str(exc),
-        ) from exc
-
     except AgentTraceError as exc:
         raise HTTPException(
             status_code=exc.status_code,
@@ -59,12 +53,6 @@ async def ingest_event_batch(
 ) -> TelemetryBatchResponse:
     try:
         return await service.ingest_batch(request)
-
-    except EventServiceError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=str(exc),
-        ) from exc
 
     except AgentTraceError as exc:
         raise HTTPException(

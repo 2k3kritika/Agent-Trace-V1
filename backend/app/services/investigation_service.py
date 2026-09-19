@@ -2,169 +2,189 @@ from __future__ import annotations
 
 from typing import Any
 
+from app.core.constants import RiskLevel
+from app.core.exceptions import InvestigationNotFoundError
 from app.infrastructure.postgres.models import Investigation
 from app.repositories.interfaces import InvestigationRepository
+from app.schemas.common import PaginationParams
+from app.schemas.investigations import (
+    InvestigationCreateRequest,
+    InvestigationListResponse,
+    InvestigationResponse,
+    InvestigationUpdateRequest,
+)
 
 
 class InvestigationService:
-    """
-    Application service for investigation lifecycle management.
-
-    Investigation state is persisted through InvestigationRepository.
-    Routes never access SQLAlchemy directly.
-    """
-
-    def __init__(
-        self,
-        repository: InvestigationRepository,
-    ) -> None:
+    def __init__(self, repository: InvestigationRepository):
         self.repository = repository
+
+    @staticmethod
+    def _to_response(
+        investigation: Investigation,
+    ) -> InvestigationResponse:
+        return InvestigationResponse.model_validate(
+            {
+                "id": investigation.id,
+                "session_id": investigation.session_id,
+                "agent_id": investigation.agent_id,
+                "status": investigation.status,
+                "risk_score": investigation.risk_score,
+                "risk_level": investigation.risk_level,
+                "scenario": investigation.scenario,
+                "verdict_type": investigation.verdict_type,
+                "attack_vector": investigation.attack_vector,
+                "impact": investigation.impact,
+                "sensitive_action_attempted": (
+                    investigation.sensitive_action_attempted
+                ),
+                "sensitive_action_executed": (
+                    investigation.sensitive_action_executed
+                ),
+                "policy_violation": investigation.policy_violation,
+                "action_blocked": investigation.action_blocked,
+                "external_transmission": investigation.external_transmission,
+                "summary": investigation.summary or {},
+                "graph": investigation.graph or {},
+                "created_at": investigation.created_at,
+                "updated_at": investigation.updated_at,
+            }
+        )
 
     async def create_investigation(
         self,
-        *,
-        session_id: str | None = None,
-        agent_id: str | None = None,
-        status: str = "OPEN",
-        risk_score: int = 0,
-        risk_level: str = "LOW",
-        scenario: str | None = None,
-        verdict_type: str | None = None,
-        attack_vector: str | None = None,
-        impact: str | None = None,
-        sensitive_action_attempted: bool = False,
-        sensitive_action_executed: bool = False,
-        policy_violation: bool = False,
-        action_blocked: bool = False,
-        external_transmission: bool = False,
-        summary: dict[str, Any] | None = None,
-        graph: dict[str, Any] | None = None,
-    ) -> Investigation:
+        request: InvestigationCreateRequest,
+    ) -> InvestigationResponse:
         investigation = Investigation(
-            session_id=session_id,
-            agent_id=agent_id,
-            status=status,
-            risk_score=risk_score,
-            risk_level=risk_level,
-            scenario=scenario,
-            verdict_type=verdict_type,
-            attack_vector=attack_vector,
-            impact=impact,
-            sensitive_action_attempted=sensitive_action_attempted,
-            sensitive_action_executed=sensitive_action_executed,
-            policy_violation=policy_violation,
-            action_blocked=action_blocked,
-            external_transmission=external_transmission,
-            summary=summary or {},
-            graph=graph or {},
+            session_id=request.session_id,
+            agent_id=request.agent_id,
+            status=request.status,
+            risk_score=request.risk_score,
+            risk_level=request.risk_level.value,
+            scenario=request.scenario,
+            verdict_type=request.verdict_type,
+            attack_vector=request.attack_vector,
+            impact=request.impact,
+            sensitive_action_attempted=request.sensitive_action_attempted,
+            sensitive_action_executed=request.sensitive_action_executed,
+            policy_violation=request.policy_violation,
+            action_blocked=request.action_blocked,
+            external_transmission=request.external_transmission,
+            summary=request.summary,
+            graph=request.graph,
         )
 
-        return await self.repository.create(investigation)
+        created = await self.repository.create(investigation)
+        return self._to_response(created)
 
     async def get_investigation(
         self,
         investigation_id: str,
-    ) -> Investigation:
-        return await self.repository.get_by_id(
-            investigation_id
+    ) -> InvestigationResponse:
+        investigation = await self.repository.get_by_id(investigation_id)
+
+        if investigation is None:
+            raise InvestigationNotFoundError(
+                f"Investigation '{investigation_id}' was not found."
+            )
+
+        return self._to_response(investigation)
+
+    async def list_investigations(
+        self,
+        pagination: PaginationParams,
+        session_id: str | None = None,
+        agent_id: str | None = None,
+        status: str | None = None,
+        severity: RiskLevel | None = None,
+    ) -> InvestigationListResponse:
+        result = await self.repository.list_page(
+            page=pagination.page,
+            page_size=pagination.page_size,
+            session_id=session_id,
+            agent_id=agent_id,
+            status=status,
+            risk_level=severity.value if severity else None,
+        )
+
+        items = [
+            self._to_response(investigation)
+            for investigation in result.items
+        ]
+
+        return InvestigationListResponse(
+            items=items,
+            page=pagination.page,
+            page_size=pagination.page_size,
+            total=result.total,
+            has_next=(
+                pagination.page * pagination.page_size
+                < result.total
+            ),
         )
 
     async def update_investigation(
         self,
         investigation_id: str,
-        **updates: Any,
-    ) -> Investigation:
-        cleaned_updates = {
-            key: value
-            for key, value in updates.items()
-            if value is not None
-        }
+        request: InvestigationUpdateRequest,
+    ) -> InvestigationResponse:
+        investigation = await self.repository.get_by_id(investigation_id)
 
-        if not cleaned_updates:
-            return await self.get_investigation(
-                investigation_id
+        if investigation is None:
+            raise InvestigationNotFoundError(
+                f"Investigation '{investigation_id}' was not found."
             )
 
-        return await self.repository.update(
-            investigation_id,
-            cleaned_updates,
+        updates = request.model_dump(
+            exclude_unset=True,
+            exclude_none=True,
         )
 
-    async def update_risk(
-        self,
-        investigation_id: str,
-        *,
-        risk_score: int,
-        risk_level: str,
-    ) -> Investigation:
-        return await self.repository.update(
+        if "risk_level" in updates:
+            risk_level = updates["risk_level"]
+
+            if isinstance(risk_level, RiskLevel):
+                updates["risk_level"] = risk_level.value
+
+        for field_name, value in updates.items():
+            setattr(investigation, field_name, value)
+
+        updated = await self.repository.update(
             investigation_id,
-            {
-                "risk_score": risk_score,
-                "risk_level": risk_level,
-            },
+            investigation,
         )
 
-    async def update_security_state(
-        self,
-        investigation_id: str,
-        *,
-        sensitive_action_attempted: bool | None = None,
-        sensitive_action_executed: bool | None = None,
-        policy_violation: bool | None = None,
-        action_blocked: bool | None = None,
-        external_transmission: bool | None = None,
-    ) -> Investigation:
-        updates = {
-            "sensitive_action_attempted": sensitive_action_attempted,
-            "sensitive_action_executed": sensitive_action_executed,
-            "policy_violation": policy_violation,
-            "action_blocked": action_blocked,
-            "external_transmission": external_transmission,
-        }
-
-        return await self.update_investigation(
-            investigation_id,
-            **updates,
-        )
+        return self._to_response(updated)
 
     async def close_investigation(
         self,
         investigation_id: str,
-    ) -> Investigation:
-        return await self.repository.update(
-            investigation_id,
-            {
-                "status": "CLOSED",
-            },
-        )
-
-    async def list_investigations(
-        self,
         *,
-        page: int = 1,
-        page_size: int = 25,
-        agent_id: str | None = None,
-        session_id: str | None = None,
-        status: str | None = None,
-        risk_level: str | None = None,
-    ):
-        filters: dict[str, Any] = {}
+        verdict_type: str | None = None,
+        impact: str | None = None,
+        summary: dict[str, Any] | None = None,
+    ) -> InvestigationResponse:
+        investigation = await self.repository.get_by_id(investigation_id)
 
-        if agent_id is not None:
-            filters["agent_id"] = agent_id
+        if investigation is None:
+            raise InvestigationNotFoundError(
+                f"Investigation '{investigation_id}' was not found."
+            )
 
-        if session_id is not None:
-            filters["session_id"] = session_id
+        investigation.status = "CLOSED"
 
-        if status is not None:
-            filters["status"] = status
+        if verdict_type is not None:
+            investigation.verdict_type = verdict_type
 
-        if risk_level is not None:
-            filters["risk_level"] = risk_level
+        if impact is not None:
+            investigation.impact = impact
 
-        return await self.repository.list_page(
-            page=page,
-            page_size=page_size,
-            filters=filters,
+        if summary is not None:
+            investigation.summary = summary
+
+        updated = await self.repository.update(
+            investigation_id,
+            investigation,
         )
+
+        return self._to_response(updated)
