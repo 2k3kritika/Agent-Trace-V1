@@ -1,14 +1,16 @@
-from fastapi import APIRouter, Depends
-from fastapi.responses import Response
+from __future__ import annotations
+
+from fastapi import APIRouter, Depends, Query, status
 
 from app.schemas.artifacts import (
-    ArtifactCreateRequest,
-    ArtifactResponse,
+    ArtifactContentResponse,
+    ArtifactDeleteResponse,
+    ArtifactUploadRequest,
+    ArtifactUploadResponse,
 )
 from app.services.artifact_service import ArtifactService
-from app.services.dependency import (
-    get_artifact_service,
-)
+from app.services.dependency import get_artifact_service
+
 
 router = APIRouter(
     prefix="/artifacts",
@@ -18,37 +20,33 @@ router = APIRouter(
 
 @router.post(
     "",
-    response_model=ArtifactResponse,
+    response_model=ArtifactUploadResponse,
+    status_code=status.HTTP_201_CREATED,
 )
-async def create_artifact(
-    request: ArtifactCreateRequest,
+async def upload_artifact(
+    request: ArtifactUploadRequest,
     service: ArtifactService = Depends(get_artifact_service),
-) -> ArtifactResponse:
-    return await service.create_artifact(request)
+) -> ArtifactUploadResponse:
+    return await service.upload(request)
 
 
 @router.get(
     "/content",
+    response_model=ArtifactContentResponse,
 )
-async def read_artifact(
-    storage_uri: str,
+async def get_artifact_content(
+    artifact_uri: str = Query(..., min_length=1),
     service: ArtifactService = Depends(get_artifact_service),
-) -> Response:
-    content = await service.read_artifact(storage_uri)
-
-    return Response(
-        content=content,
-        media_type="application/octet-stream",
-    )
+) -> ArtifactContentResponse:
+    return await service.get_content(artifact_uri)
 
 
 @router.delete(
     "/content",
+    response_model=ArtifactDeleteResponse,
 )
-async def delete_artifact(
-    storage_uri: str,
+async def delete_artifact_content(
+    artifact_uri: str = Query(..., min_length=1),
     service: ArtifactService = Depends(get_artifact_service),
-) -> dict[str, str]:
-    await service.delete_artifact(storage_uri)
-
-    return {"message": "Artifact deleted successfully."}
+) -> ArtifactDeleteResponse:
+    return await service.delete(artifact_uri)

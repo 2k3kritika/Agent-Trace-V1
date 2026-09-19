@@ -2,6 +2,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.api.routes import adapters
+from app.api.routes import demo
 
 from app.api.routes import (
     agents,
@@ -92,10 +94,10 @@ app.include_router(forensics.router)
 app.include_router(dashboard.router)
 
 app.include_router(artifacts.router)
-
+app.include_router(adapters.router)
 app.include_router(auth.router)
 app.include_router(audit.router)
-
+app.include_router(demo.router)
 
 @app.get("/", tags=["Root"])
 async def root() -> dict[str, str]:

@@ -33,3 +33,5 @@ mypy>=1.11,<2.0
 
 
 email-validator
+boto3>=1.35,<2.0
+mangum>=0.17,<1.0

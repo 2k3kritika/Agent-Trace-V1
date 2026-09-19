@@ -18,6 +18,8 @@ from app.api.routes import (
     sessions,
     telemetry,
 )
+from app.api.routes import adapters
+from app.api.routes import demo
 
 __all__ = [
     "agents",
@@ -38,4 +40,6 @@ __all__ = [
     "reports",
     "sessions",
     "telemetry",
+    "adapters",
+    "demo"
 ]

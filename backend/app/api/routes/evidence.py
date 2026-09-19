@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, Query, status
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.schemas.common import MessageResponse, PaginationParams
 from app.schemas.evidence import (
@@ -8,10 +7,9 @@ from app.schemas.evidence import (
     EvidenceResponse,
     EvidenceUpdateRequest,
 )
-from app.services.dependency import (
-    get_db_session,
-    get_evidence_service,
-)
+from app.services.dependency import get_evidence_service
+from app.services.evidence_service import EvidenceService
+
 
 router = APIRouter(
     prefix="/evidence",
@@ -26,10 +24,8 @@ router = APIRouter(
 )
 async def create_evidence(
     request: EvidenceCreateRequest,
-    db: AsyncSession = Depends(get_db_session),
+    service: EvidenceService = Depends(get_evidence_service),
 ) -> EvidenceResponse:
-    service = get_evidence_service(db)
-
     return await service.create_evidence(request)
 
 
@@ -41,10 +37,8 @@ async def list_evidence(
     pagination: PaginationParams = Depends(),
     investigation_id: str | None = Query(default=None),
     evidence_type: str | None = Query(default=None),
-    db: AsyncSession = Depends(get_db_session),
+    service: EvidenceService = Depends(get_evidence_service),
 ) -> EvidenceListResponse:
-    service = get_evidence_service(db)
-
     items, total = await service.list_evidence(
         page=pagination.page,
         page_size=pagination.page_size,
@@ -67,10 +61,8 @@ async def list_evidence(
 )
 async def list_investigation_evidence(
     investigation_id: str,
-    db: AsyncSession = Depends(get_db_session),
+    service: EvidenceService = Depends(get_evidence_service),
 ) -> list[EvidenceResponse]:
-    service = get_evidence_service(db)
-
     return await service.list_investigation_evidence(investigation_id)
 
 
@@ -80,10 +72,8 @@ async def list_investigation_evidence(
 )
 async def get_evidence(
     evidence_id: str,
-    db: AsyncSession = Depends(get_db_session),
+    service: EvidenceService = Depends(get_evidence_service),
 ) -> EvidenceResponse:
-    service = get_evidence_service(db)
-
     return await service.get_evidence(evidence_id)
 
 
@@ -94,10 +84,8 @@ async def get_evidence(
 async def update_evidence(
     evidence_id: str,
     request: EvidenceUpdateRequest,
-    db: AsyncSession = Depends(get_db_session),
+    service: EvidenceService = Depends(get_evidence_service),
 ) -> EvidenceResponse:
-    service = get_evidence_service(db)
-
     return await service.update_evidence(
         evidence_id,
         request,
@@ -110,10 +98,10 @@ async def update_evidence(
 )
 async def delete_evidence(
     evidence_id: str,
-    db: AsyncSession = Depends(get_db_session),
+    service: EvidenceService = Depends(get_evidence_service),
 ) -> MessageResponse:
-    service = get_evidence_service(db)
-
     await service.delete_evidence(evidence_id)
 
-    return MessageResponse(message="Evidence deleted successfully.")
+    return MessageResponse(
+        message="Evidence deleted successfully."
+    )

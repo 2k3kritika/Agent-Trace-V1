@@ -1,79 +1,75 @@
 from __future__ import annotations
 
-import base64
-
 from app.core.exceptions import AppError
-from app.infrastructure.storage.local import (
-    LocalArtifactStorage,
-)
 from app.schemas.artifacts import (
-    ArtifactCreateRequest,
-    ArtifactResponse,
+    ArtifactContentResponse,
+    ArtifactDeleteResponse,
+    ArtifactUploadRequest,
+    ArtifactUploadResponse,
 )
+from app.services.storage_service import StorageService
 
 
 class ArtifactService:
-    def __init__(
-        self,
-        storage: LocalArtifactStorage,
-    ):
-        self.storage = storage
+    def __init__(self, storage_service: StorageService) -> None:
+        self.storage_service = storage_service
 
-    async def create_artifact(
+    async def upload(
         self,
-        request: ArtifactCreateRequest,
-    ) -> ArtifactResponse:
-        if request.content is None:
-            raise AppError(
-                status_code=400,
-                message="Artifact content is required.",
-            )
-
+        request: ArtifactUploadRequest,
+    ) -> ArtifactUploadResponse:
         try:
-            content = base64.b64decode(
-                request.content,
-                validate=True,
+            result = await self.storage_service.save_base64(
+                filename=request.filename,
+                content_type=request.content_type,
+                content_base64=request.content_base64,
+                metadata=request.metadata,
             )
-        except Exception as exc:
+        except ValueError as exc:
             raise AppError(
                 status_code=400,
-                message=("Artifact content must be valid base64 data."),
+                message=str(exc),
             ) from exc
 
-        stored = await self.storage.store(
-            filename=request.filename,
-            content=content,
-            content_type=request.content_type,
-        )
+        return ArtifactUploadResponse.model_validate(result)
 
-        return ArtifactResponse(
-            artifact_id=stored.artifact_id,
-            investigation_id=request.investigation_id,
-            evidence_id=request.evidence_id,
-            artifact_type=request.artifact_type,
-            filename=stored.filename,
-            content_type=stored.content_type,
-            size_bytes=stored.size_bytes,
-            storage_uri=stored.storage_uri,
-            sha256=stored.sha256,
-            metadata=request.metadata,
-            created_at=stored.created_at,
-        )
-
-    async def read_artifact(
+    async def get_content(
         self,
-        storage_uri: str,
-    ) -> bytes:
+        artifact_uri: str,
+    ) -> ArtifactContentResponse:
         try:
-            return await self.storage.read(storage_uri)
+            result = await self.storage_service.get(artifact_uri)
         except FileNotFoundError as exc:
             raise AppError(
                 status_code=404,
-                message="Artifact was not found.",
+                message="Artifact not found.",
+            ) from exc
+        except ValueError as exc:
+            raise AppError(
+                status_code=400,
+                message=str(exc),
             ) from exc
 
-    async def delete_artifact(
+        return ArtifactContentResponse.model_validate(result)
+
+    async def delete(
         self,
-        storage_uri: str,
-    ) -> None:
-        await self.storage.delete(storage_uri)
+        artifact_uri: str,
+    ) -> ArtifactDeleteResponse:
+        try:
+            deleted = await self.storage_service.delete(artifact_uri)
+        except FileNotFoundError as exc:
+            raise AppError(
+                status_code=404,
+                message="Artifact not found.",
+            ) from exc
+        except ValueError as exc:
+            raise AppError(
+                status_code=400,
+                message=str(exc),
+            ) from exc
+
+        return ArtifactDeleteResponse(
+            deleted=deleted,
+            artifact_uri=artifact_uri,
+        )
